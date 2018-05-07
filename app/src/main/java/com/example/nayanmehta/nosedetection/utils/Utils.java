@@ -1,20 +1,18 @@
-package com.example.ezequiel.camera2.utils;
+package com.example.nayanmehta.nosedetection.utils;
 
-/**
- * Created by Ezequiel Adrian on 24/02/2017.
- */
+
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
 import com.google.android.gms.common.images.Size;
-
-import java.util.ArrayList;
 
 public class Utils {
 
@@ -58,6 +56,7 @@ public class Utils {
         return new PointF((p1.x+p2.x)/2, (p1.y+p2.y)/2);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public static Size[] sizeToSize(android.util.Size[] sizes) {
         Size[] size = new Size[sizes.length];
         for(int i=0; i<sizes.length; i++) {

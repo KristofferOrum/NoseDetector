@@ -1,8 +1,6 @@
-package com.example.nayanmehta.nosedetection;
+package com.example.nayanmehta.nosedetection.others;
 
-/**
- * Created by Ezequiel Adrian on 26/02/2017.
- */
+
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -13,8 +11,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
+import android.util.Log;
 
-import com.example.ezequiel.camera2.others.GraphicOverlay;
+import com.example.nayanmehta.nosedetection.others.GraphicOverlay;
+import com.example.nayanmehta.nosedetection.R;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
 
@@ -23,7 +23,7 @@ import com.google.android.gms.vision.face.Landmark;
  * graphic overlay view.
  */
 public class FaceGraphic extends GraphicOverlay.Graphic {
-    private Bitmap marker;
+    public Bitmap marker;
 
     private BitmapFactory.Options opt;
     private Resources resources;
@@ -32,15 +32,23 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     PointF facePosition;
     float faceWidth;
     float faceHeight;
-    PointF faceCenter;
     float isSmilingProbability = -1;
     float eyeRightOpenProbability = -1;
     float eyeLeftOpenProbability = -1;
     float eulerZ;
     float eulerY;
-    PointF leftEyePos = null;
-    PointF rightEyePos = null;
-    PointF noseBasePos = null;
+
+    /*public PointF p_faceCenter;
+    public PointF p_leftEyePos;
+    public PointF p_rightEyePos;
+    public PointF p_noseBasePos;*/
+    public PointF faceCenter = null;
+    public PointF leftEyePos = null;
+    public PointF rightEyePos = null;
+    public PointF noseBasePos = null;
+    public int canvasWidth=0;
+    public int canvasHeight=0;
+
     PointF leftMouthCorner = null;
     PointF rightMouthCorner = null;
     PointF mouthBase = null;
@@ -50,6 +58,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     PointF rightEarTip = null;
     PointF leftCheek = null;
     PointF rightCheek = null;
+
 
     private volatile Face mFace;
 
@@ -105,6 +114,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         faceWidth = face.getWidth() * 4;
         faceHeight = face.getHeight() * 4;
         faceCenter = new PointF(translateX(face.getPosition().x + faceWidth/8), translateY(face.getPosition().y + faceHeight/8));
+       // p_faceCenter = new PointF(face.getPosition().x + faceWidth/8, face.getPosition().y + faceHeight/8);
         isSmilingProbability = face.getIsSmilingProbability();
         eyeRightOpenProbability = face.getIsRightEyeOpenProbability();
         eyeLeftOpenProbability = face.getIsLeftEyeOpenProbability();
@@ -115,12 +125,17 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             switch (landmark.getType()) {
                 case Landmark.LEFT_EYE:
                     leftEyePos = new PointF(translateX(landmark.getPosition().x), translateY(landmark.getPosition().y));
+                   //p_leftEyePos = new PointF(landmark.getPosition().x, landmark.getPosition().y);
                     break;
                 case Landmark.RIGHT_EYE:
                     rightEyePos = new PointF(translateX(landmark.getPosition().x), translateY(landmark.getPosition().y));
+                   //p_rightEyePos = new PointF(landmark.getPosition().x, landmark.getPosition().y);
+
                     break;
                 case Landmark.NOSE_BASE:
                     noseBasePos = new PointF(translateX(landmark.getPosition().x), translateY(landmark.getPosition().y));
+                    //p_noseBasePos = new PointF(landmark.getPosition().x, landmark.getPosition().y);
+
                     break;
                 case Landmark.LEFT_MOUTH:
                     leftMouthCorner = new PointF(translateX(landmark.getPosition().x), translateY(landmark.getPosition().y));
@@ -151,6 +166,14 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
                     break;
             }
         }
+
+       /* p_faceCenter = faceCenter;
+        p_leftEyePos = leftEyePos;
+        p_rightEyePos = rightEyePos;
+        p_noseBasePos = noseBasePos;*/
+       //Log.d("Here here"," "+canvas.getHeight()+"  "+canvas.getWidth());
+        canvasWidth=canvas.getWidth();
+        canvasHeight=canvas.getHeight();
 
         Paint mPaint = new Paint();
         mPaint.setColor(Color.WHITE);

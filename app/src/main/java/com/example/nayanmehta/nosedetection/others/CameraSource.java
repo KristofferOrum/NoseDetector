@@ -1,4 +1,4 @@
-package com.example.nayanmehta.nosedetection;
+package com.example.nayanmehta.nosedetection.others;
 
 /*
  * Copyright (C) The Android Open Source Project
@@ -41,7 +41,7 @@ import android.view.SurfaceHolder;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.example.ezequiel.camera2.utils.Utils;
+import com.example.nayanmehta.nosedetection.utils.Utils;
 import com.google.android.gms.common.images.Size;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.Frame;

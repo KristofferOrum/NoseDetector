@@ -1,4 +1,4 @@
-package com.example.nayanmehta.nosedetection;
+package com.example.nayanmehta.nosedetection.others;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -37,12 +37,13 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.MotionEvent;
 import android.view.Surface;
 
+
 import com.example.nayanmehta.nosedetection.utils.Utils;
+import com.google.android.gms.common.images.Size;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.Frame;
 
@@ -62,14 +63,8 @@ import java.util.TreeMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Camera2Source: Created by Ezequiel Adrian Minniti. Buenos Aires.
- * 
- * This work is the evolution of the original CameraSource from GoogleSamples.
- * Made by ♥ for the community. You are free to use it anywhere.
- * Just show my name on the credits :)
- *
- */
+
+
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class Camera2Source {
@@ -746,7 +741,7 @@ public class Camera2Source {
     private Size getBestAspectPictureSize(android.util.Size[] supportedPictureSizes) {
         float targetRatio = Utils.getScreenRatio(mContext);
         Size bestSize = null;
-        TreeMap<Double, List<Size>> diffs = new TreeMap<>();
+        TreeMap<Double, List<android.util.Size>> diffs = new TreeMap<>();
 
         //Select supported sizes which ratio is less than ratioTolerance
         for (android.util.Size size : supportedPictureSizes) {
@@ -757,7 +752,7 @@ public class Camera2Source {
                     //add the value to the list
                     diffs.get(diff).add(size);
                 } else {
-                    List<Size> newList = new ArrayList<>();
+                    List<android.util.Size> newList = new ArrayList<>();
                     newList.add(size);
                     diffs.put(diff, newList);
                 }
@@ -774,7 +769,7 @@ public class Camera2Source {
                         //add the value to the list
                         diffs.get(diff).add(size);
                     } else {
-                        List<Size> newList = new ArrayList<>();
+                        List<android.util.Size> newList = new ArrayList<>();
                         newList.add(size);
                         diffs.put(diff, newList);
                     }

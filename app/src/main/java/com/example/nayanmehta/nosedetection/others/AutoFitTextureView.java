@@ -1,6 +1,6 @@
 
 
-package com.example.nayanmehta.nosedetection;
+package com.example.nayanmehta.nosedetection.others;
 
 import android.content.Context;
 import android.util.AttributeSet;

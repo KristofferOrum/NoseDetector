@@ -1,8 +1,6 @@
-package com.example.nayanmehta.nosedetection;
+package com.example.nayanmehta.nosedetection.others;
 
-/**
- * Created by Ezequiel on 27/11/2016.
- */
+
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -33,9 +31,9 @@ import java.util.Set;
 public class GraphicOverlay extends View {
     private final Object mLock = new Object();
     private int mPreviewWidth;
-    private float mWidthScaleFactor = 1.0f;
+    public float mWidthScaleFactor = 1.0f;
     private int mPreviewHeight;
-    private float mHeightScaleFactor = 1.0f;
+    public float mHeightScaleFactor = 1.0f;
     private int mFacing = CameraSource.CAMERA_FACING_BACK;
     private Set<Graphic> mGraphics = new HashSet<>();
 
@@ -45,7 +43,7 @@ public class GraphicOverlay extends View {
      * graphics element.  Add instances to the overlay using {@link GraphicOverlay#add(Graphic)}.
      */
     public static abstract class Graphic {
-        private GraphicOverlay mOverlay;
+        public GraphicOverlay mOverlay;
 
         public Graphic(GraphicOverlay overlay) {
             mOverlay = overlay;

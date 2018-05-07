@@ -6,6 +6,9 @@
     <string name="request_permission">This sample needs camera permission.</string>
     <string name="camera_error">This device doesn\'t support Camera2 API.</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="take_picture">Picture</string>
+    <string name="switch_camera">Switch</string>
+    <string name="record_video">Video</string>
+    <string name="stop_video">Stop</string>
+
 </resources>

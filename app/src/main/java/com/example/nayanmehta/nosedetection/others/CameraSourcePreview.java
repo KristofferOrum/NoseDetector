@@ -1,4 +1,4 @@
-package com.example.nayanmehta.nosedetection;
+package com.example.nayanmehta.nosedetection.others;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
@@ -9,7 +9,7 @@ import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.ViewGroup;
 
-import com.example.ezequiel.camera2.utils.Utils;
+import com.example.nayanmehta.nosedetection.utils.Utils;
 import com.google.android.gms.common.images.Size;
 
 import java.io.IOException;
