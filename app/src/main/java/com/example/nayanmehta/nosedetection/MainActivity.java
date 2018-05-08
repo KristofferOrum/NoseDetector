@@ -334,8 +334,8 @@ public class MainActivity extends AppCompatActivity {
             buffer.get(bytes);
             Bitmap picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, null);
             Bitmap noseBit= null;
-            Bitmap noseFlip=null;
-            Bitmap noseCrop=null;
+            Bitmap noseFlip= null;
+            Bitmap noseCrop= null;
             Matrix m;
             int noseWidth, noseHeight;
 
@@ -344,9 +344,9 @@ public class MainActivity extends AppCompatActivity {
                 noseCrop=Bitmap.createScaledBitmap(picture,mFaceGraphic.canvasWidth,mFaceGraphic.canvasHeight,true);
                 if((mFaceGraphic.leftEyePos !=null)&&(mFaceGraphic.rightEyePos !=null)&&(mFaceGraphic.faceCenter !=null)){
 
-                    noseWidth= (int) Math.sqrt(Math.pow(Math.round(mFaceGraphic.rightEyePos.x) - Math.round(mFaceGraphic.leftEyePos.x), 2) + Math.pow(Math.round(mFaceGraphic.rightEyePos.y) - Math.round(mFaceGraphic.leftEyePos.y) , 2));;
-                    noseHeight= (int) Math.sqrt(Math.pow(Math.round(mFaceGraphic.faceCenter.x) - Math.round(mFaceGraphic.noseBasePos.x), 2) + Math.pow(Math.round(mFaceGraphic.faceCenter.y) - Math.round(mFaceGraphic.noseBasePos.y) , 2));;
-                    noseBit= Bitmap.createBitmap(noseCrop,Math.round(mFaceGraphic.leftEyePos.x),Math.round(mFaceGraphic.leftEyePos.y),noseWidth,noseHeight);
+                    noseWidth= Math.round(mFaceGraphic.rightEyePos.x) - Math.round(mFaceGraphic.leftEyePos.x);
+                    noseHeight= Math.round(mFaceGraphic.noseBasePos.y)-Math.round(mFaceGraphic.faceCenter.y);
+                    noseBit= Bitmap.createBitmap(noseCrop,Math.round(mFaceGraphic.faceCenter.x+noseWidth/2),Math.round(mFaceGraphic.faceCenter.y),noseWidth, noseHeight);
                 }
 
                 cameraFile= "/" + formatter.format(new Date()) + ".png";
