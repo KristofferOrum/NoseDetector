@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
                 {
                     noseWidth= Math.round(mFaceGraphic.rightEyePos.x) - Math.round(mFaceGraphic.leftEyePos.x);
                     noseHeight= Math.round(mFaceGraphic.noseBasePos.y)-Math.round(mFaceGraphic.faceCenter.y);
-                    noseBit= Bitmap.createBitmap(noseCrop,Math.round(mFaceGraphic.faceCenter.x+noseWidth/2),Math.round(mFaceGraphic.faceCenter.y),noseWidth, noseHeight);
+                    noseBit= Bitmap.createBitmap(noseCrop,Math.round(mFaceGraphic.leftEyePos.x),Math.round(mFaceGraphic.leftEyePos.y),noseWidth, noseHeight);
                 }
                 Log.d(TAG,"Bitmap Info:"+noseCrop.getHeight()+" "+noseCrop.getWidth());
                 Log.d(TAG,"Point values"+mFaceGraphic.leftEyePos+"  "+mFaceGraphic.rightEyePos+"  "+mFaceGraphic.faceCenter+"  "+mFaceGraphic.noseBasePos);
