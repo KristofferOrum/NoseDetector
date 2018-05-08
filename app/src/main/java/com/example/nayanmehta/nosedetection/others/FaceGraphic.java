@@ -188,32 +188,32 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             int noseHeight = Math.round(noseBasePos.y) - Math.round(faceCenter.y);
 
             canvas.drawRect((int)(faceCenter.x - noseWidth/4), (int)faceCenter.y, (int)(faceCenter.x + noseWidth/2), (int)(faceCenter.y + noseHeight), mPaint);
-//        if(faceCenter != null)
-//            canvas.drawBitmap(marker, faceCenter.x, faceCenter.y, null);
-//        if(noseBasePos != null)
-//            canvas.drawBitmap(marker, noseBasePos.x, noseBasePos.y, null);
-//        if(leftEyePos != null)
-//            canvas.drawBitmap(marker, leftEyePos.x, leftEyePos.y, null);
-//        if(rightEyePos != null)
-//            canvas.drawBitmap(marker, rightEyePos.x, rightEyePos.y, null);
-//        if(mouthBase != null)
-//            canvas.drawBitmap(marker, mouthBase.x, mouthBase.y, null);
-//        if(leftMouthCorner != null)
-//            canvas.drawBitmap(marker, leftMouthCorner.x, leftMouthCorner.y, null);
-//        if(rightMouthCorner != null)
-//            canvas.drawBitmap(marker, rightMouthCorner.x, rightMouthCorner.y, null);
-//        if(leftEar != null)
-//            canvas.drawBitmap(marker, leftEar.x, leftEar.y, null);
-//        if(rightEar != null)
-//            canvas.drawBitmap(marker, rightEar.x, rightEar.y, null);
-//        if(leftEarTip != null)
-//            canvas.drawBitmap(marker, leftEarTip.x, leftEarTip.y, null);
-//        if(rightEarTip != null)
-//            canvas.drawBitmap(marker, rightEarTip.x, rightEarTip.y, null);
-//        if(leftCheek != null)
-//            canvas.drawBitmap(marker, leftCheek.x, leftCheek.y, null);
-//        if(rightCheek != null)
-//            canvas.drawBitmap(marker, rightCheek.x, rightCheek.y, null);
+        if(faceCenter != null)
+            canvas.drawBitmap(marker, faceCenter.x, faceCenter.y, null);
+        if(noseBasePos != null)
+            canvas.drawBitmap(marker, noseBasePos.x, noseBasePos.y, null);
+        if(leftEyePos != null)
+            canvas.drawBitmap(marker, leftEyePos.x, leftEyePos.y, null);
+        if(rightEyePos != null)
+            canvas.drawBitmap(marker, rightEyePos.x, rightEyePos.y, null);
+        if(mouthBase != null)
+            canvas.drawBitmap(marker, mouthBase.x, mouthBase.y, null);
+        if(leftMouthCorner != null)
+            canvas.drawBitmap(marker, leftMouthCorner.x, leftMouthCorner.y, null);
+        if(rightMouthCorner != null)
+            canvas.drawBitmap(marker, rightMouthCorner.x, rightMouthCorner.y, null);
+        if(leftEar != null)
+            canvas.drawBitmap(marker, leftEar.x, leftEar.y, null);
+        if(rightEar != null)
+            canvas.drawBitmap(marker, rightEar.x, rightEar.y, null);
+        if(leftEarTip != null)
+            canvas.drawBitmap(marker, leftEarTip.x, leftEarTip.y, null);
+        if(rightEarTip != null)
+            canvas.drawBitmap(marker, rightEarTip.x, rightEarTip.y, null);
+        if(leftCheek != null)
+            canvas.drawBitmap(marker, leftCheek.x, leftCheek.y, null);
+        if(rightCheek != null)
+            canvas.drawBitmap(marker, rightCheek.x, rightCheek.y, null);
 
         }
     }
