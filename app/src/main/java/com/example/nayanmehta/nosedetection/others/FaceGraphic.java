@@ -187,7 +187,8 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             int noseWidth = Math.round(rightEyePos.x) - Math.round(leftEyePos.x);
             int noseHeight = Math.round(noseBasePos.y) - Math.round(faceCenter.y);
 
-            canvas.drawRect((int)(faceCenter.x - noseWidth/4), (int)faceCenter.y, (int)(faceCenter.x + noseWidth/2), (int)(faceCenter.y + noseHeight), mPaint);
+            canvas.drawRect((int)(faceCenter.x - noseWidth/2), (int)faceCenter.y, (int)(faceCenter.x + noseWidth/2), (int)(faceCenter.y + noseHeight), mPaint);
+            Log.d("FaceGraphic Class"," "+(faceCenter.x-noseWidth/2)+" "+faceCenter.y);
         if(faceCenter != null)
             canvas.drawBitmap(marker, faceCenter.x, faceCenter.y, null);
         if(noseBasePos != null)
