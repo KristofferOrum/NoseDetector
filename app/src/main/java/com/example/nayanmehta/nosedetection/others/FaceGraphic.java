@@ -24,6 +24,23 @@ import com.google.android.gms.vision.face.Landmark;
  * graphic overlay view.
  */
 public class FaceGraphic extends GraphicOverlay.Graphic {
+    private static final float FACE_POSITION_RADIUS = 10.0f;
+    private static final float ID_TEXT_SIZE = 40.0f;
+    private static final float ID_Y_OFFSET = 50.0f;
+    private static final float ID_X_OFFSET = -50.0f;
+    private static final float BOX_STROKE_WIDTH = 5.0f;
+
+    private static final int COLOR_CHOICES[] = {
+            Color.BLUE,
+            Color.CYAN,
+            Color.GREEN,
+            Color.MAGENTA,
+            Color.RED,
+            Color.WHITE,
+            Color.YELLOW
+    };
+    private static int mCurrentColorIndex = 0;
+
     public Bitmap marker;
 
     private BitmapFactory.Options opt;
@@ -64,29 +81,39 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
     private volatile Face mFace;
 
+    private Paint mFacePositionPaint;
+    private Paint mIdPaint;
+    private Paint mBoxPaint;
+
     public FaceGraphic(GraphicOverlay overlay, Context context) {
         super(overlay);
+
+        mCurrentColorIndex = (mCurrentColorIndex + 1) % COLOR_CHOICES.length;
+        final int selectedColor = COLOR_CHOICES[mCurrentColorIndex];
+
         opt = new BitmapFactory.Options();
         opt.inScaled = false;
         resources = context.getResources();
         marker = BitmapFactory.decodeResource(resources, R.drawable.marker, opt);
+
+        mFacePositionPaint = new Paint();
+        mFacePositionPaint.setColor(selectedColor);
+
+        mIdPaint = new Paint();
+        mIdPaint.setColor(selectedColor);
+        mIdPaint.setTextSize(ID_TEXT_SIZE);
+
+        mBoxPaint = new Paint();
+        mBoxPaint.setColor(selectedColor);
+        mBoxPaint.setStyle(Paint.Style.STROKE);
+        mBoxPaint.setStrokeWidth(BOX_STROKE_WIDTH);
     }
 
     public void setId(int id) {
         faceId = id;
     }
 
-    public float getSmilingProbability() {
-        return isSmilingProbability;
-    }
 
-    public float getEyeRightOpenProbability() {
-        return eyeRightOpenProbability;
-    }
-
-    public float getEyeLeftOpenProbability() {
-        return eyeLeftOpenProbability;
-    }
 
     /**
      * Updates the face instance from the detection of the most recent frame.  Invalidates the
@@ -189,6 +216,9 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
             canvas.drawRect((int)(faceCenter.x - noseWidth/2), (int)faceCenter.y, (int)(faceCenter.x + noseWidth/2), (int)(faceCenter.y + noseHeight), mPaint);
             Log.d("FaceGraphic Class"," "+(faceCenter.x-noseWidth/2)+" "+faceCenter.y);
+
+
+
         if(faceCenter != null)
             canvas.drawBitmap(marker, faceCenter.x, faceCenter.y, null);
         if(noseBasePos != null)
@@ -215,6 +245,22 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             canvas.drawBitmap(marker, leftCheek.x, leftCheek.y, null);
         if(rightCheek != null)
             canvas.drawBitmap(marker, rightCheek.x, rightCheek.y, null);
+
+            // Draws a circle at the position of the detected face, with the face's track id below.
+            float x = translateX(face.getPosition().x + face.getWidth() / 2);
+            float y = translateY(face.getPosition().y + face.getHeight() / 2);
+            //canvas.drawCircle(x, y, FACE_POSITION_RADIUS, mFacePositionPaint);
+            canvas.drawText("id: " + faceId, x + ID_X_OFFSET, y + ID_Y_OFFSET, mIdPaint);
+
+
+            // Draws a bounding box around the face.
+            float xOffset = scaleX(face.getWidth() / 2.0f);
+            float yOffset = scaleY(face.getHeight() / 2.0f);
+            float left = x - xOffset;
+            float top = y - yOffset;
+            float right = x + xOffset;
+            float bottom = y + yOffset;
+            canvas.drawRect(left, top, right, bottom, mBoxPaint);
 
         }
     }
