@@ -57,10 +57,10 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     float eulerZ;
     float eulerY;
 
-    /*public PointF p_faceCenter;
+    public PointF p_faceCenter;
     public PointF p_leftEyePos;
     public PointF p_rightEyePos;
-    public PointF p_noseBasePos;*/
+    public PointF p_noseBasePos;
     public PointF faceCenter = null;
     public PointF leftEyePos = null;
     public PointF rightEyePos = null;
@@ -149,7 +149,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         faceWidth = face.getWidth() * 4;
         faceHeight = face.getHeight() * 4;
         faceCenter = new PointF(translateX(face.getPosition().x + faceWidth/8), translateY(face.getPosition().y + faceHeight/8));
-       // p_faceCenter = new PointF(face.getPosition().x + faceWidth/8, face.getPosition().y + faceHeight/8);
+        p_faceCenter = new PointF(face.getPosition().x + faceWidth/8, face.getPosition().y + faceHeight/8);
         isSmilingProbability = face.getIsSmilingProbability();
         eyeRightOpenProbability = face.getIsRightEyeOpenProbability();
         eyeLeftOpenProbability = face.getIsLeftEyeOpenProbability();
@@ -160,16 +160,16 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             switch (landmark.getType()) {
                 case Landmark.LEFT_EYE:
                     leftEyePos = new PointF(translateX(landmark.getPosition().x), translateY(landmark.getPosition().y));
-                   //p_leftEyePos = new PointF(landmark.getPosition().x, landmark.getPosition().y);
+                   p_leftEyePos = new PointF(landmark.getPosition().x, landmark.getPosition().y);
                     break;
                 case Landmark.RIGHT_EYE:
                     rightEyePos = new PointF(translateX(landmark.getPosition().x), translateY(landmark.getPosition().y));
-                   //p_rightEyePos = new PointF(landmark.getPosition().x, landmark.getPosition().y);
+                   p_rightEyePos = new PointF(landmark.getPosition().x, landmark.getPosition().y);
 
                     break;
                 case Landmark.NOSE_BASE:
                     noseBasePos = new PointF(translateX(landmark.getPosition().x), translateY(landmark.getPosition().y));
-                    //p_noseBasePos = new PointF(landmark.getPosition().x, landmark.getPosition().y);
+                    p_noseBasePos = new PointF(landmark.getPosition().x, landmark.getPosition().y);
 
                     break;
                 case Landmark.LEFT_MOUTH:
@@ -202,10 +202,10 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             }
         }
 
-       /* p_faceCenter = faceCenter;
-        p_leftEyePos = leftEyePos;
-        p_rightEyePos = rightEyePos;
-        p_noseBasePos = noseBasePos;*/
+//       p_faceCenter = faceCenter;
+//        p_leftEyePos = leftEyePos;
+//        p_rightEyePos = rightEyePos;
+//        p_noseBasePos = noseBasePos;
        //Log.d("Here here"," "+canvas.getHeight()+"  "+canvas.getWidth());
         canvasWidth=canvas.getWidth();
         canvasHeight=canvas.getHeight();

@@ -18,7 +18,7 @@ public class CameraSourcePreview extends ViewGroup {
     private static final String TAG = "CameraSourcePreview";
 
     //PREVIEW VISUALIZERS FOR BOTH CAMERA1 AND CAMERA2 API.
-    private SurfaceView mSurfaceView;
+    public SurfaceView mSurfaceView;
     private AutoFitTextureView mAutoFitTextureView;
 
     private boolean usingCameraOne;

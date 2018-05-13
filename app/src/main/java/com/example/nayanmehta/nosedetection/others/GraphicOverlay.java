@@ -31,11 +31,11 @@ import java.util.Set;
  */
 public class GraphicOverlay extends View {
     private final Object mLock = new Object();
-    private int mPreviewWidth;
+    public int mPreviewWidth;
     public float mWidthScaleFactor = 1.0f;
-    private int mPreviewHeight;
+    public int mPreviewHeight;
     public float mHeightScaleFactor = 1.0f;
-    private int mFacing = CameraSource.CAMERA_FACING_BACK;
+    public int mFacing = CameraSource.CAMERA_FACING_BACK;
     private Set<Graphic> mGraphics = new HashSet<>();
 
     /**
