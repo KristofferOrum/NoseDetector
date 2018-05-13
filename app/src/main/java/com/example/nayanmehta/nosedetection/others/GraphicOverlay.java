@@ -4,6 +4,7 @@ package com.example.nayanmehta.nosedetection.others;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -97,6 +98,22 @@ public class GraphicOverlay extends View {
         public float translateY(float y) {
             return scaleY(y);
         }
+
+        /**
+         * Returns a RectF in which the left and right parameters of the provided Rect are adjusted
+         * by translateX, and the top and bottom are adjusted by translateY.
+         */
+        public RectF translateRect(RectF inputRect) {
+            RectF returnRect = new RectF();
+
+            returnRect.left = translateX(inputRect.left);
+            returnRect.top = translateY(inputRect.top);
+            returnRect.right = translateX(inputRect.right);
+            returnRect.bottom = translateY(inputRect.bottom);
+
+            return returnRect;
+        }
+
 
         public void postInvalidate() {
             mOverlay.postInvalidate();

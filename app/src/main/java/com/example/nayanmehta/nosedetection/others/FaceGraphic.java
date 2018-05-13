@@ -12,6 +12,7 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.Log;
 
 import com.example.nayanmehta.nosedetection.others.GraphicOverlay;
@@ -67,6 +68,8 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     public Bitmap myBitmap;
     public int canvasWidth=0;
     public int canvasHeight=0;
+    public RectF nosePreviewRect = null;
+    public RectF noseViewRect = null;
 
     PointF leftMouthCorner = null;
     PointF rightMouthCorner = null;
@@ -79,11 +82,14 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     PointF rightCheek = null;
 
 
+
     private volatile Face mFace;
 
     private Paint mFacePositionPaint;
     private Paint mIdPaint;
     private Paint mBoxPaint;
+
+
 
     public FaceGraphic(GraphicOverlay overlay, Context context) {
         super(overlay);
@@ -215,11 +221,13 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             int noseHeight = Math.round(noseBasePos.y) - Math.round(faceCenter.y);
 
             canvas.drawRect((int)(faceCenter.x - noseWidth/2), (int)faceCenter.y, (int)(faceCenter.x + noseWidth/2), (int)(faceCenter.y + noseHeight), mPaint);
-            Log.d("FaceGraphic Class"," "+(faceCenter.x-noseWidth/2)+" "+faceCenter.y);
+           // Log.d("FaceGraphic Class"," "+(faceCenter.x-noseWidth/2)+" "+faceCenter.y);
+              Log.d(" "," "+(faceCenter.x - noseWidth/2)+" "+faceCenter.y);
 
+            nosePreviewRect = new RectF((int)(faceCenter.x - noseWidth/2),(int)faceCenter.y ,(int)(faceCenter.x + noseWidth/2) ,(int)(faceCenter.y + noseHeight) );
+            noseViewRect= translateRect(nosePreviewRect);
 
-
-        if(faceCenter != null)
+            if(faceCenter != null)
             canvas.drawBitmap(marker, faceCenter.x, faceCenter.y, null);
         if(noseBasePos != null)
             canvas.drawBitmap(marker, noseBasePos.x, noseBasePos.y, null);
@@ -261,6 +269,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             float right = x + xOffset;
             float bottom = y + yOffset;
             canvas.drawRect(left, top, right, bottom, mBoxPaint);
+            Log.d("","Offset"+xOffset+" "+yOffset);
 
         }
     }

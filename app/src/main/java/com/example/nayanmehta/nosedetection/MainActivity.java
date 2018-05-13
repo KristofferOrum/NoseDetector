@@ -163,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
     Bitmap noseFlip=null;
     Bitmap noseCrop=null;
     int noseWidth, noseHeight;
+    int noseX,noseY;
     Matrix m;
 
         @Override
@@ -177,28 +178,37 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             FileOutputStream out = null;
-            noseCrop=Bitmap.createScaledBitmap(picture,mFaceGraphic.canvasWidth,mFaceGraphic.canvasHeight,true);
+            //noseCrop=Bitmap.createScaledBitmap(picture,mFaceGraphic.canvasWidth,mFaceGraphic.canvasHeight,true);
             try {
                 //markerNew=mFaceGraphic.marker;
 
-                if((mFaceGraphic.leftEyePos !=null)&&(mFaceGraphic.rightEyePos !=null)&&(mFaceGraphic.faceCenter !=null))
-                {
-                    noseWidth= Math.round(mFaceGraphic.rightEyePos.x) - Math.round(mFaceGraphic.leftEyePos.x);
-                    noseHeight= Math.round(mFaceGraphic.noseBasePos.y)-Math.round(mFaceGraphic.faceCenter.y);
-                    noseBit= Bitmap.createBitmap(noseCrop,Math.round(mFaceGraphic.faceCenter.x-noseWidth/2),Math.round(mFaceGraphic.faceCenter.y),noseWidth, noseHeight);
-                }
+
                // Log.d(TAG,"Bitmap Info:"+noseCrop.getHeight()+" "+noseCrop.getWidth());
                 //Log.d(TAG,"Point values"+mFaceGraphic.leftEyePos+"  "+mFaceGraphic.rightEyePos+"  "+mFaceGraphic.faceCenter+"  "+mFaceGraphic.noseBasePos);
                 //Log.d(TAG,"  "+noseWidth+"  "+noseHeight+"  "+" "+noseBit.getWidth()+" "+noseBit.getHeight());
 
-                Log.d(TAG," "+(mFaceGraphic.faceCenter.x-noseWidth/2)+" "+mFaceGraphic.faceCenter.y);
-                cameraFile= "/" + formatter.format(new Date()) + ".png";
-                out = new FileOutputStream(new File(Environment.getExternalStorageDirectory(), cameraFile));
-                m = new Matrix();
-                m.preScale(-1, 1);
-                noseFlip = Bitmap.createBitmap(noseBit, 0, 0, noseBit.getWidth(), noseBit.getHeight(), m, false);
-                noseFlip.setDensity(DisplayMetrics.DENSITY_DEFAULT);
-                Log.d(TAG,"  "+" "+noseFlip.getWidth()+" "+noseFlip.getHeight());
+                //Log.d(TAG," "+(mFaceGraphic.faceCenter.x-noseWidth/2)+" "+mFaceGraphic.faceCenter.y);
+
+
+                if(mFaceGraphic.noseViewRect !=null){
+                    noseX= Math.round(mFaceGraphic.noseViewRect.left);
+                    noseY= Math.round(mFaceGraphic.noseViewRect.top);
+                    if((mFaceGraphic.leftEyePos !=null)&&(mFaceGraphic.rightEyePos !=null)&&(mFaceGraphic.faceCenter !=null))
+                    {
+                        noseWidth= Math.round(mFaceGraphic.rightEyePos.x) - Math.round(mFaceGraphic.leftEyePos.x);
+                        noseHeight= Math.round(mFaceGraphic.noseBasePos.y)-Math.round(mFaceGraphic.faceCenter.y);
+                        noseBit= Bitmap.createBitmap(noseCrop,noseX,noseY,noseWidth, noseHeight);
+                    }
+                     Log.d(TAG,noseX+""+noseY);
+                    cameraFile= "/" + formatter.format(new Date()) + ".png";
+                    out = new FileOutputStream(new File(Environment.getExternalStorageDirectory(), cameraFile));
+                    m = new Matrix();
+                    m.preScale(-1, 1);
+                    noseFlip = Bitmap.createBitmap(noseBit, 0, 0, noseBit.getWidth(), noseBit.getHeight(), m, false);
+                    noseFlip.setDensity(DisplayMetrics.DENSITY_DEFAULT);
+                    Log.d(TAG,"  "+" "+noseFlip.getWidth()+" "+noseFlip.getHeight());
+                }
+
                 if( noseFlip!=null){
                     noseFlip.compress(Bitmap.CompressFormat.JPEG, 95, out);
                 }else{
