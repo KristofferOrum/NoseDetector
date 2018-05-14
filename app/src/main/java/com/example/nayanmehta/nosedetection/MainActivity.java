@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +21,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -49,6 +52,8 @@ import java.util.Date;
 import java.util.Locale;
 
 
+
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "Nayan Mehta Camera";
@@ -57,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_STORAGE_PERMISSION = 201;
     private TextView cameraVersion;
     private ImageView ivAutoFocus;
+    private ImageView ivNoseCrop;
+
+    private ScaleGestureDetector mScaleGestureDetector;
+    private float mScaleFactor = 1.0f;
 
     // CAMERA VERSION ONE DECLARATIONS
     private CameraSource mCameraSource = null;
@@ -84,9 +93,29 @@ public class MainActivity extends AppCompatActivity {
     // ANY ATTEMPT TO START CAMERA2 ON API < 21 WILL CRASH.
     private boolean useCamera2 = true;
 
+    private View getDecorView() {
+        return getWindow().getDecorView();
+    }
+
+    protected void enableFullScreen(boolean enabled) {
+        int newVisibility =  View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+
+        if(enabled) {
+            newVisibility |= View.SYSTEM_UI_FLAG_VISIBLE
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        }
+
+        getDecorView().setSystemUiVisibility(newVisibility);
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        enableFullScreen(true);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
         context = getApplicationContext();
@@ -98,6 +127,9 @@ public class MainActivity extends AppCompatActivity {
         mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
         cameraVersion = (TextView) findViewById(R.id.cameraVersion);
         ivAutoFocus = (ImageView) findViewById(R.id.ivAutoFocus);
+        ivNoseCrop= (ImageView) findViewById(R.id.ivNoseCrop);
+        mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
+
 
         if(checkGooglePlayAvailability()) {
             requestPermissionThenOpenCamera();
@@ -155,8 +187,42 @@ public class MainActivity extends AppCompatActivity {
 
             mPreview.setOnTouchListener(CameraPreviewTouchListener);
         }
+        updateUI();
     }
 
+    public void updateUI() {
+        final View decorView = getWindow().getDecorView();
+        decorView.setOnSystemUiVisibilityChangeListener (new View.OnSystemUiVisibilityChangeListener() {
+            @Override
+            public void onSystemUiVisibilityChange(int visibility) {
+                if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                    decorView.setSystemUiVisibility(
+                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+                }
+            }
+        });
+    }
+
+    public boolean onTouchEvent(MotionEvent motionEvent) {
+        mScaleGestureDetector.onTouchEvent(motionEvent);
+        return true;
+    }
+    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector scaleGestureDetector){
+            mScaleFactor *= scaleGestureDetector.getScaleFactor();
+            mScaleFactor = Math.max(0.1f,
+                    Math.min(mScaleFactor, 10.0f));
+            ivNoseCrop.setScaleX(mScaleFactor);
+            ivNoseCrop.setScaleY(mScaleFactor);
+            return true;
+        }
+    }
     final CameraSource.ShutterCallback cameraSourceShutterCallback = new CameraSource.ShutterCallback() {@Override public void onShutter() {Log.d(TAG, "Shutter Callback!");}};
     final CameraSource.PictureCallback cameraSourcePictureCallback = new CameraSource.PictureCallback() {
     Bitmap noseBit=null;
@@ -165,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
     int noseWidth, noseHeight;
     int noseX,noseY;
     Matrix m;
+    Canvas tempCanvas;
 
         @Override
         public void onPictureTaken(Bitmap picture) {
@@ -230,6 +297,11 @@ public class MainActivity extends AppCompatActivity {
                 if( noseFlip!=null)
                 {
                     noseFlip.compress(Bitmap.CompressFormat.JPEG, 95, out);
+
+                    Canvas tempCanvas = new Canvas();
+                    tempCanvas.drawBitmap(noseFlip, 0, 0, null);
+                    ivNoseCrop.setImageDrawable(new BitmapDrawable(getResources(), noseFlip));
+
                 }
                 else{
                     picture.compress(Bitmap.CompressFormat.JPEG, 95, out);
