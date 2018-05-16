@@ -22,6 +22,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -62,7 +63,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_STORAGE_PERMISSION = 201;
     private TextView cameraVersion;
     private ImageView ivAutoFocus;
-    private ImageView ivNoseCrop;
+    public ImageView ivNoseCrop;
+
 
     private ScaleGestureDetector mScaleGestureDetector;
     private float mScaleFactor = 1.0f;
@@ -80,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private FaceGraphic mFaceGraphic;
     private boolean wasActivityResumed = false;
     private boolean isRecordingVideo = false;
-    private Button takePictureButton;
+    public static Button takePictureButton;
     private Button switchButton;
     private Button videoButton;
     private String cameraFile;
@@ -91,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
     // MUST BE CAREFUL USING THIS VARIABLE.
     // ANY ATTEMPT TO START CAMERA2 ON API < 21 WILL CRASH.
-    private boolean useCamera2 = true;
+    public boolean useCamera2 = true;
 
     private View getDecorView() {
         return getWindow().getDecorView();
@@ -129,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
         ivAutoFocus = (ImageView) findViewById(R.id.ivAutoFocus);
         ivNoseCrop= (ImageView) findViewById(R.id.ivNoseCrop);
         mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
+
 
 
         if(checkGooglePlayAvailability()) {
@@ -286,8 +289,9 @@ public class MainActivity extends AppCompatActivity {
 
                         noseBit= Bitmap.createBitmap(noseCrop, x, y, w , h);
                     }
-                    cameraFile= "/" + formatter.format(new Date()) + ".png";
-                    out = new FileOutputStream(new File(Environment.getExternalStorageDirectory(), cameraFile));
+                    //cameraFile= "/" + formatter.format(new Date()) + ".png";
+                    //out = new FileOutputStream(new File(Environment.getExternalStorageDirectory(), cameraFile));
+
                     m = new Matrix();
                     m.preScale(-1, 1);
                     noseFlip = Bitmap.createBitmap(noseBit, 0, 0, noseBit.getWidth(), noseBit.getHeight(), m, false);
@@ -296,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if( noseFlip!=null)
                 {
-                    noseFlip.compress(Bitmap.CompressFormat.JPEG, 95, out);
+                    //noseFlip.compress(Bitmap.CompressFormat.JPEG, 95, out);
 
                     Canvas tempCanvas = new Canvas();
                     tempCanvas.drawBitmap(noseFlip, 0, 0, null);
@@ -304,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 else{
-                    picture.compress(Bitmap.CompressFormat.JPEG, 95, out);
+                    //picture.compress(Bitmap.CompressFormat.JPEG, 95, out);
                 }
 
             } catch (Exception e) {

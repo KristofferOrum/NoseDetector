@@ -14,11 +14,16 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
+import android.widget.Button;
 
 import com.example.nayanmehta.nosedetection.others.GraphicOverlay;
+import com.example.nayanmehta.nosedetection.MainActivity;
 import com.example.nayanmehta.nosedetection.R;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
+
+import static com.example.nayanmehta.nosedetection.MainActivity.takePictureButton;
+
 
 /**
  * Graphic instance for rendering face position, orientation, and landmarks within an associated
@@ -113,6 +118,8 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         mBoxPaint.setColor(selectedColor);
         mBoxPaint.setStyle(Paint.Style.STROKE);
         mBoxPaint.setStrokeWidth(BOX_STROKE_WIDTH);
+
+
     }
 
     public void setId(int id) {
@@ -271,6 +278,15 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             canvas.drawRect(left, top, right, bottom, mBoxPaint);
             Log.d("","Offset"+xOffset+" "+yOffset);
 
+            try {
+                takePictureButton.performClick();
+
+            }
+            catch (Exception e){
+                System.out.println("Error ");
+            }
+
         }
+
     }
 }
