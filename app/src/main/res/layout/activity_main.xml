@@ -63,12 +63,14 @@
         android:layout_height="60dp"
         android:src="@drawable/btn_autofocus"
         android:visibility="gone"
-        android:text="AutoFocus"/>
+        android:text="AutoFocus"
+        />
 
     <ImageView
         android:id="@+id/ivNoseCrop"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"/>
 
 
 </FrameLayout>
