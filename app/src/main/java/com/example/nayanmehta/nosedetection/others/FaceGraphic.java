@@ -2,6 +2,7 @@ package com.example.nayanmehta.nosedetection.others;
 
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -13,8 +14,12 @@ import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.Toast;
+import android.os.Handler;
 
 import com.example.nayanmehta.nosedetection.others.GraphicOverlay;
 import com.example.nayanmehta.nosedetection.MainActivity;
@@ -22,7 +27,11 @@ import com.example.nayanmehta.nosedetection.R;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
 
+
+import static com.example.nayanmehta.nosedetection.MainActivity.ivNoseCrop;
 import static com.example.nayanmehta.nosedetection.MainActivity.takePictureButton;
+import static com.example.nayanmehta.nosedetection.MainActivity.bitmapArray;
+import static com.example.nayanmehta.nosedetection.MainActivity.noseFlip;
 
 
 /**
@@ -30,6 +39,10 @@ import static com.example.nayanmehta.nosedetection.MainActivity.takePictureButto
  * graphic overlay view.
  */
 public class FaceGraphic extends GraphicOverlay.Graphic {
+
+    private static final String TAG = "Nayan Mehta Face Graphic";
+    public Handler handler;
+
     private static final float FACE_POSITION_RADIUS = 10.0f;
     private static final float ID_TEXT_SIZE = 40.0f;
     private static final float ID_Y_OFFSET = 50.0f;
@@ -51,6 +64,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
     private BitmapFactory.Options opt;
     private Resources resources;
+    private Context appContext;
 
     private int faceId;
     PointF facePosition;
@@ -95,6 +109,15 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     private Paint mBoxPaint;
 
 
+    public Runnable runnableCode = new Runnable() {
+        @Override
+        public void run() {
+            // Do something here on the main thread
+            Log.d("Handlers", "Called on main thread");
+            // Repeat this the same runnable code block again another 2 seconds
+            //handler.postDelayed(runnableCode, 2000);
+        }
+    };
 
     public FaceGraphic(GraphicOverlay overlay, Context context) {
         super(overlay);
@@ -105,6 +128,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         opt = new BitmapFactory.Options();
         opt.inScaled = false;
         resources = context.getResources();
+        appContext = context;
         marker = BitmapFactory.decodeResource(resources, R.drawable.marker, opt);
 
         mFacePositionPaint = new Paint();
@@ -118,6 +142,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         mBoxPaint.setColor(selectedColor);
         mBoxPaint.setStyle(Paint.Style.STROKE);
         mBoxPaint.setStrokeWidth(BOX_STROKE_WIDTH);
+        //handler = new Handler(Looper.getMainLooper());
 
 
     }
@@ -141,6 +166,20 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         mFace = null;
     }
 
+
+
+    public void idleState(){
+        Log.d("idle","Idle idle it's so idle");
+        if(bitmapArray.size() > 0)
+        {
+            int index = bitmapArray.size() -1;
+            Bitmap lastbitmap = bitmapArray.get(index-5);
+            ivNoseCrop.setImageBitmap(lastbitmap);
+        }
+
+    }
+
+    @SuppressLint("LongLogTag")
     @Override
     public void draw(Canvas canvas) {
         Face face = mFace;
@@ -278,6 +317,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             canvas.drawRect(left, top, right, bottom, mBoxPaint);
             Log.d("","Offset"+xOffset+" "+yOffset);
 
+
             try {
                 takePictureButton.performClick();
 
@@ -289,6 +329,10 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
 
         }
+       // handler.post(runnableCode);
 
     }
+
+
+
 }

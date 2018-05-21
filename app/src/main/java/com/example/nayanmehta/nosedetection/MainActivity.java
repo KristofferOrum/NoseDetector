@@ -29,6 +29,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.Handler;
 
 import com.example.nayanmehta.nosedetection.others.Camera2Source;
 import com.example.nayanmehta.nosedetection.others.FaceGraphic;
@@ -49,9 +50,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-
 
 
 
@@ -63,8 +64,19 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_STORAGE_PERMISSION = 201;
     private TextView cameraVersion;
     private ImageView ivAutoFocus;
-    public ImageView ivNoseCrop;
+    public static ImageView ivNoseCrop;
 
+    public static Bitmap noseFlip;
+    public static ArrayList<Bitmap> bitmapArray;
+
+
+
+
+    /*
+    * Use the bBoxScaleFactor to change the size of the
+    *
+    * */
+    private double bBoxScaleFactor= 1.0;
 
     private ScaleGestureDetector mScaleGestureDetector;
     private float mScaleFactor = 1.0f;
@@ -77,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
     // COMMON TO BOTH CAMERAS
     private CameraSourcePreview mPreview;
-    private FaceDetector previewFaceDetector = null;
+    public FaceDetector previewFaceDetector = null;
     private GraphicOverlay mGraphicOverlay;
     private FaceGraphic mFaceGraphic;
     private boolean wasActivityResumed = false;
@@ -131,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
         ivAutoFocus = (ImageView) findViewById(R.id.ivAutoFocus);
         ivNoseCrop= (ImageView) findViewById(R.id.ivNoseCrop);
         mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
+        noseFlip=null;
+        bitmapArray = new ArrayList<Bitmap>();
 
 
 
@@ -193,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
         updateUI();
     }
 
+
     public void updateUI() {
         final View decorView = getWindow().getDecorView();
         decorView.setOnSystemUiVisibilityChangeListener (new View.OnSystemUiVisibilityChangeListener() {
@@ -229,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
     final CameraSource.ShutterCallback cameraSourceShutterCallback = new CameraSource.ShutterCallback() {@Override public void onShutter() {Log.d(TAG, "Shutter Callback!");}};
     final CameraSource.PictureCallback cameraSourcePictureCallback = new CameraSource.PictureCallback() {
     Bitmap noseBit=null;
-    Bitmap noseFlip=null;
+
     Bitmap noseCrop=null;
     Bitmap noseFinal=null;
     int noseWidth, noseHeight;
@@ -284,26 +299,29 @@ public class MainActivity extends AppCompatActivity {
                         int x = (int)((mFaceGraphic.p_faceCenter.x - noseWidth * 0.25) * (float)noseCrop.getWidth()/width_factor);
 
                         int y = (int)((mFaceGraphic.p_faceCenter.y) * (float)noseCrop.getHeight()/height_factor);
-                        int w = (int)((noseWidth) * (float)noseCrop.getWidth()/width_factor);
-                        int h = (int)((noseHeight) * (float)noseCrop.getHeight()/height_factor);
+                        int w = (int)(((noseWidth) * (float)noseCrop.getWidth()/width_factor)*bBoxScaleFactor);
+                        int h = (int)(((noseHeight) * (float)noseCrop.getHeight()/height_factor)*bBoxScaleFactor);
                         Log.d(TAG,"Draw values"+x+"  "+y+"  "+w/4 + "  "+h);
 
 
-                        noseBit= Bitmap.createBitmap(noseCrop, x, y, w/2 , h);
+                        noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h);
                     }
-                    //cameraFile= "/" + formatter.format(new Date()) + ".png";
-                    //out = new FileOutputStream(new File(Environment.getExternalStorageDirectory(), cameraFile));
+                   File f = new File(android.os.Environment.getExternalStorageDirectory(),File.separator+"NoseDetection/");
+                   f.mkdirs();
+                    cameraFile= "/" + formatter.format(new Date()) + ".png";
+                    out = new FileOutputStream(new File(f, cameraFile));
 
                     m = new Matrix();
                     m.preScale(-1, 1);
                     noseFlip = Bitmap.createBitmap(noseBit, 0, 0, noseBit.getWidth(), noseBit.getHeight(), m, false);
                     noseFlip.setDensity(DisplayMetrics.DENSITY_DEFAULT);
                     Log.d(TAG,"  "+" "+noseFlip.getWidth()+" "+noseFlip.getHeight());
-
+                    bitmapArray.add(noseFlip);
+                    Log.d(TAG," "+bitmapArray.size());
 
                 if( noseFlip!=null)
                 {
-                    //noseFlip.compress(Bitmap.CompressFormat.JPEG, 95, out);
+                    noseFlip.compress(Bitmap.CompressFormat.JPEG, 95, out);
 
                     Canvas tempCanvas = new Canvas();
                     tempCanvas.drawBitmap(noseFlip, 0, 0, null);
@@ -312,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 else{
-                    //picture.compress(Bitmap.CompressFormat.JPEG, 95, out);
+                    picture.compress(Bitmap.CompressFormat.JPEG, 95, out);
                 }
 
             } catch (Exception e) {
@@ -453,27 +471,71 @@ public class MainActivity extends AppCompatActivity {
             int noseWidth, noseHeight;
 
             FileOutputStream out = null;
+            if ( picture.getHeight() < picture.getWidth()) {
+                Matrix rotate = new Matrix();
+                rotate.postRotate(-90);
+                noseCrop = Bitmap.createBitmap(picture, 0, 0, picture.getWidth(), picture.getHeight(), rotate, true);
+            }
+            else {
+                noseCrop = picture;
+            }
             try {
-                noseCrop=Bitmap.createScaledBitmap(picture,mFaceGraphic.canvasWidth,mFaceGraphic.canvasHeight,true);
-                if((mFaceGraphic.leftEyePos !=null)&&(mFaceGraphic.rightEyePos !=null)&&(mFaceGraphic.faceCenter !=null)){
+                //markerNew=mFaceGraphic.marker;
+                Log.d(TAG,"Bitmap Info:"+noseCrop.getHeight()+" "+noseCrop.getWidth());
+                //Log.d(TAG,"  "+noseWidth+"  "+noseHeight+"  "+" "+noseBit.getWidth()+" "+noseBit.getHeight());
 
-                    noseWidth= Math.round(mFaceGraphic.rightEyePos.x) - Math.round(mFaceGraphic.leftEyePos.x);
-                    noseHeight= Math.round(mFaceGraphic.noseBasePos.y)-Math.round(mFaceGraphic.faceCenter.y);
-                    noseBit= Bitmap.createBitmap(noseCrop,Math.round(mFaceGraphic.faceCenter.x+noseWidth/2),Math.round(mFaceGraphic.faceCenter.y),noseWidth, noseHeight);
+                Log.d(TAG,"Preview Info:"+mGraphicOverlay.mPreviewHeight+" "+mGraphicOverlay.mPreviewWidth);
+                Log.d(TAG,"Point values"+mFaceGraphic.p_leftEyePos+"  "+mFaceGraphic.p_rightEyePos+"  "+mFaceGraphic.p_faceCenter+"  "+mFaceGraphic.p_noseBasePos);
+
+                if((mFaceGraphic.p_leftEyePos !=null)&&(mFaceGraphic.p_rightEyePos !=null)&&(mFaceGraphic.p_faceCenter !=null))
+                {
+                    int height_factor = mGraphicOverlay.mPreviewHeight;
+                    int width_factor = mGraphicOverlay.mPreviewWidth;
+                    if (mGraphicOverlay.mFacing == CameraSource.CAMERA_FACING_FRONT) {
+                        noseWidth= Math.round(mFaceGraphic.p_leftEyePos.x) - Math.round(mFaceGraphic.p_rightEyePos.x);
+
+                    }
+                    else {
+                        noseWidth = Math.round(mFaceGraphic.p_rightEyePos.x) - Math.round(mFaceGraphic.p_leftEyePos.x);
+
+                    }
+                    noseHeight= Math.round(mFaceGraphic.p_noseBasePos.y)-Math.round(mFaceGraphic.p_faceCenter.y);
+
+
+                    int x = (int)((mFaceGraphic.p_faceCenter.x - noseWidth * 0.25) * (float)noseCrop.getWidth()/width_factor);
+
+                    int y = (int)((mFaceGraphic.p_faceCenter.y) * (float)noseCrop.getHeight()/height_factor);
+                    int w = (int)(((noseWidth) * (float)noseCrop.getWidth()/width_factor)*bBoxScaleFactor);
+                    int h = (int)(((noseHeight) * (float)noseCrop.getHeight()/height_factor)*bBoxScaleFactor);
+                    Log.d(TAG,"Draw values"+x+"  "+y+"  "+w/4 + "  "+h);
+
+
+                    noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h);
                 }
-
+                File f = new File(android.os.Environment.getExternalStorageDirectory(),File.separator+"NoseDetection/");
+                f.mkdirs();
                 cameraFile= "/" + formatter.format(new Date()) + ".png";
-                out = new FileOutputStream(new File(Environment.getExternalStorageDirectory(), cameraFile));
+                out = new FileOutputStream(new File(f, cameraFile));
 
                 m = new Matrix();
                 m.preScale(-1, 1);
                 noseFlip = Bitmap.createBitmap(noseBit, 0, 0, noseBit.getWidth(), noseBit.getHeight(), m, false);
                 noseFlip.setDensity(DisplayMetrics.DENSITY_DEFAULT);
-
                 Log.d(TAG,"  "+" "+noseFlip.getWidth()+" "+noseFlip.getHeight());
-                if(noseFlip !=null){
+                bitmapArray.add(noseFlip);
+                Log.d(TAG," "+bitmapArray.size());
+
+                if( noseFlip!=null)
+                {
                     noseFlip.compress(Bitmap.CompressFormat.JPEG, 95, out);
-                }else{
+
+                    Canvas tempCanvas = new Canvas();
+                    tempCanvas.drawBitmap(noseFlip, 0, 0, null);
+                    ivNoseCrop.setImageDrawable(new BitmapDrawable(getResources(), noseFlip));
+                    ivNoseCrop.setScaleType(ImageView.ScaleType.FIT_XY);
+
+                }
+                else{
                     picture.compress(Bitmap.CompressFormat.JPEG, 95, out);
                 }
 
@@ -649,6 +711,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onNewItem(int faceId, Face item) {
             mFaceGraphic.setId(faceId);
+
         }
 
         /**
@@ -670,6 +733,10 @@ public class MainActivity extends AppCompatActivity {
         public void onMissing(FaceDetector.Detections<Face> detectionResults) {
             mFaceGraphic.goneFace();
             mOverlay.remove(mFaceGraphic);
+            mFaceGraphic.idleState();
+            bitmapArray.subList(0, (bitmapArray.size()/2)).clear();
+            Log.d(TAG," "+bitmapArray);
+
         }
 
         /**
@@ -759,6 +826,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 startCameraSource();
             }
+
     }
 
     @Override
