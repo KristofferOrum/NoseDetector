@@ -190,7 +190,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             eyeLeftOpenProbability = -1;
             return;
         }
-
+        canvas.drawColor(0, PorterDuff.Mode.CLEAR);
         facePosition = new PointF(translateX(face.getPosition().x), translateY(face.getPosition().y));
         faceWidth = face.getWidth() * 4;
         faceHeight = face.getHeight() * 4;
@@ -325,6 +325,8 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             catch (Exception e){
                 System.out.println("Error ");
             }
+
+
 
         }
        // handler.post(runnableCode);

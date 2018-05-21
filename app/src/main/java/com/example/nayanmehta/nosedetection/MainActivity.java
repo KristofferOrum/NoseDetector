@@ -65,7 +65,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView cameraVersion;
     private ImageView ivAutoFocus;
     public static ImageView ivNoseCrop;
-
+    private Bitmap maxBitmap;
+    private int frame_count = 0;
     public static Bitmap noseFlip;
     public static ArrayList<Bitmap> bitmapArray;
 
@@ -98,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
     private Button switchButton;
     private Button videoButton;
     private String cameraFile;
+    private ArrayList<Bitmap> BitmapList = new ArrayList<Bitmap>();
+    private int person_store_count = 5;
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
 
     // DEFAULT CAMERA BEING OPENED
@@ -105,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
     // MUST BE CAREFUL USING THIS VARIABLE.
     // ANY ATTEMPT TO START CAMERA2 ON API < 21 WILL CRASH.
-    public boolean useCamera2 = true;
+    public boolean useCamera2 = false;
 
     private View getDecorView() {
         return getWindow().getDecorView();
@@ -263,7 +266,6 @@ public class MainActivity extends AppCompatActivity {
                     takePictureButton.setEnabled(true);
                 }
             });
-            FileOutputStream out = null;
 
             if ( picture.getHeight() < picture.getWidth()) {
                 Matrix rotate = new Matrix();
@@ -306,11 +308,6 @@ public class MainActivity extends AppCompatActivity {
 
                         noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h);
                     }
-                   File f = new File(android.os.Environment.getExternalStorageDirectory(),File.separator+"NoseDetection/");
-                   f.mkdirs();
-                    cameraFile= "/" + formatter.format(new Date()) + ".png";
-                    out = new FileOutputStream(new File(f, cameraFile));
-
                     m = new Matrix();
                     m.preScale(-1, 1);
                     noseFlip = Bitmap.createBitmap(noseBit, 0, 0, noseBit.getWidth(), noseBit.getHeight(), m, false);
@@ -318,31 +315,33 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG,"  "+" "+noseFlip.getWidth()+" "+noseFlip.getHeight());
                     bitmapArray.add(noseFlip);
                     Log.d(TAG," "+bitmapArray.size());
+                if( noseFlip!=null) {
 
-                if( noseFlip!=null)
-                {
-                    noseFlip.compress(Bitmap.CompressFormat.JPEG, 95, out);
+                    if (BitmapList.size() <= person_store_count) {
+                        BitmapList.add(noseFlip);
+                    } else
+                        {
+                        Bitmap compare_bitmap = null;
 
+                        for (int i = 0; i < BitmapList.size(); i++) {
+                            compare_bitmap = BitmapList.get(i);
+                            float prev_resolution = compare_bitmap.getHeight() * compare_bitmap.getWidth();
+                            float curr_resolution = noseFlip.getHeight() * noseFlip.getWidth();
+                            if (curr_resolution >= prev_resolution) {
+                                BitmapList.set(i, noseFlip);
+                            }
+                        }
+
+
+                    }
                     Canvas tempCanvas = new Canvas();
                     tempCanvas.drawBitmap(noseFlip, 0, 0, null);
                     ivNoseCrop.setImageDrawable(new BitmapDrawable(getResources(), noseFlip));
                     ivNoseCrop.setScaleType(ImageView.ScaleType.FIT_XY);
-
-                }
-                else{
-                    picture.compress(Bitmap.CompressFormat.JPEG, 95, out);
                 }
 
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                try {
-                    if (out != null) {
-                        out.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }
     };
@@ -512,10 +511,7 @@ public class MainActivity extends AppCompatActivity {
 
                     noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h);
                 }
-                File f = new File(android.os.Environment.getExternalStorageDirectory(),File.separator+"NoseDetection/");
-                f.mkdirs();
-                cameraFile= "/" + formatter.format(new Date()) + ".png";
-                out = new FileOutputStream(new File(f, cameraFile));
+
 
                 m = new Matrix();
                 m.preScale(-1, 1);
@@ -527,8 +523,25 @@ public class MainActivity extends AppCompatActivity {
 
                 if( noseFlip!=null)
                 {
-                    noseFlip.compress(Bitmap.CompressFormat.JPEG, 95, out);
 
+                    if (BitmapList.size() < person_store_count) {
+                        BitmapList.add(noseFlip);
+                    }
+                    else{
+                        Bitmap compare_bitmap = null;
+
+                        for (int i=0; i < BitmapList.size(); i++){
+                        compare_bitmap = BitmapList.get(i);
+                        float prev_resolution = compare_bitmap.getHeight() * compare_bitmap.getWidth();
+                            float curr_resolution = noseFlip.getHeight() * noseFlip.getWidth();
+                        if ( curr_resolution >= prev_resolution ){
+                            BitmapList.set(i, noseFlip);
+                        }
+                        }
+
+
+
+                    }
                     Canvas tempCanvas = new Canvas();
                     tempCanvas.drawBitmap(noseFlip, 0, 0, null);
                     ivNoseCrop.setImageDrawable(new BitmapDrawable(getResources(), noseFlip));
@@ -569,7 +582,7 @@ public class MainActivity extends AppCompatActivity {
     private void requestPermissionThenOpenCamera() {
         if(ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                useCamera2 = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
+//                useCamera2 = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
                 Log.d(TAG,"bUILD INFO"+useCamera2);
                 createCameraSourceFront();
             } else {
@@ -710,6 +723,29 @@ public class MainActivity extends AppCompatActivity {
          */
         @Override
         public void onNewItem(int faceId, Face item) {
+            FileOutputStream out = null;
+            File f = new File(android.os.Environment.getExternalStorageDirectory(),File.separator+"NoseDetection/");
+            f.mkdirs();
+            Log.d("SAVE", "Saving the images");
+
+            if (BitmapList.size() > 0 ){
+
+                for (int i=0; i < BitmapList.size(); i++){
+                    cameraFile= "/" + formatter.format(new Date()) + "-"+ i +".png";
+                    try {
+                        Log.d("Image_Saved:", cameraFile);
+                        out = new FileOutputStream(new File(f, cameraFile));
+                        Bitmap save_image = BitmapList.get(i);
+                        save_image.compress(Bitmap.CompressFormat.JPEG, 95, out);
+
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+                BitmapList.clear();
+            }
             mFaceGraphic.setId(faceId);
 
         }
