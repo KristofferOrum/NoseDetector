@@ -277,21 +277,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-
+            if ( picture.getHeight() < picture.getWidth()) {
+                Matrix rotate = new Matrix();
+                rotate.postRotate(-90);
+                picture = Bitmap.createBitmap(picture, 0, 0, picture.getWidth(), picture.getHeight(), rotate, true);
+            }
             Frame frame = new Frame.Builder().setBitmap(picture).build();
             SparseArray<Face> faces = detector.detect(frame);
-
             if(detector !=null){
                 Log.d("FACES"," "+faces.size()+" "+faces);
-                if(faces.size()>0){
-                    if ( picture.getHeight() < picture.getWidth()) {
-                        Matrix rotate = new Matrix();
-                        rotate.postRotate(-90);
-                        noseCrop = Bitmap.createBitmap(picture, 0, 0, picture.getWidth(), picture.getHeight(), rotate, true);
-                    }
-                    else {
-                        noseCrop = picture;
-                    }
+                if(faces.size() > 0){
+                    noseCrop = picture;
                     try {
                         //markerNew=mFaceGraphic.marker;
                         Log.d(TAG,"Bitmap Info:"+noseCrop.getHeight()+" "+noseCrop.getWidth());
