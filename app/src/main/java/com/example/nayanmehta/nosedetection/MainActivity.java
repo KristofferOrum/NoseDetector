@@ -65,8 +65,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView cameraVersion;
     private ImageView ivAutoFocus;
     public static ImageView ivNoseCrop;
-    private Bitmap maxBitmap;
-    private int frame_count = 0;
+    private int lastsavedID;
+    private int currentFaceID;
+
     public static Bitmap noseFlip;
     public static ArrayList<Bitmap> bitmapArray;
 
@@ -100,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
     private Button videoButton;
     private String cameraFile;
     private ArrayList<Bitmap> BitmapList = new ArrayList<Bitmap>();
-    private int person_store_count = 5;
+    private int person_store_count = 1;
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
 
     // DEFAULT CAMERA BEING OPENED
@@ -317,11 +318,11 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG," "+bitmapArray.size());
                 if( noseFlip!=null) {
 
-                    if (BitmapList.size() <= person_store_count) {
+                    if (BitmapList.size() < person_store_count) {
                         BitmapList.add(noseFlip);
                     } else
                         {
-                        Bitmap compare_bitmap = null;
+                        Bitmap compare_bitmap;
 
                         for (int i = 0; i < BitmapList.size(); i++) {
                             compare_bitmap = BitmapList.get(i);
@@ -723,6 +724,7 @@ public class MainActivity extends AppCompatActivity {
          */
         @Override
         public void onNewItem(int faceId, Face item) {
+            System.out.println("FaceID: "+ faceId);
             FileOutputStream out = null;
             File f = new File(android.os.Environment.getExternalStorageDirectory(),File.separator+"NoseDetection/");
             f.mkdirs();
@@ -731,7 +733,9 @@ public class MainActivity extends AppCompatActivity {
             if (BitmapList.size() > 0 ){
 
                 for (int i=0; i < BitmapList.size(); i++){
-                    cameraFile= "/" + formatter.format(new Date()) + "-"+ i +".png";
+                    cameraFile= "/" + formatter.format(new Date()) + "_"+ (faceId - 1) + "_" + i +".png";
+                    lastsavedID = faceId - 1;
+                    currentFaceID = faceId;
                     try {
                         Log.d("Image_Saved:", cameraFile);
                         out = new FileOutputStream(new File(f, cameraFile));
@@ -879,7 +883,34 @@ public class MainActivity extends AppCompatActivity {
         if(previewFaceDetector != null) {
             previewFaceDetector.release();
         }
+        System.out.println("Current Faceid:" + currentFaceID + ", Last: " + lastsavedID);
+        if (currentFaceID >= lastsavedID){
+            FileOutputStream out = null;
+            File f = new File(android.os.Environment.getExternalStorageDirectory(),File.separator+"NoseDetection/");
+            f.mkdirs();
+            Log.d("SAVE", "Saving the images");
+            if (BitmapList.size() > 0 ){
+
+                for (int i=0; i < BitmapList.size(); i++){
+                    cameraFile= "/" + formatter.format(new Date()) + "_"+ (currentFaceID) + "_" + i +".png";
+
+                    try {
+                        Log.d("Image_Saved:", cameraFile);
+                        out = new FileOutputStream(new File(f, cameraFile));
+                        Bitmap save_image = BitmapList.get(i);
+                        save_image.compress(Bitmap.CompressFormat.JPEG, 95, out);
+
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+                BitmapList.clear();
+            }
+        }
     }
+
 
 
 }
