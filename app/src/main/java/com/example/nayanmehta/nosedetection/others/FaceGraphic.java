@@ -173,7 +173,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         if(bitmapArray.size() > 0)
         {
             int index = bitmapArray.size() -1;
-            Bitmap lastbitmap = bitmapArray.get(index-5);
+            Bitmap lastbitmap = bitmapArray.get(index);
             ivNoseCrop.setImageBitmap(lastbitmap);
         }
 

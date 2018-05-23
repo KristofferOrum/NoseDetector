@@ -11,6 +11,7 @@ import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.Image;
+import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,6 +21,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.SurfaceView;
@@ -40,6 +42,8 @@ import com.example.nayanmehta.nosedetection.others.GraphicOverlay;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.vision.Detector;
+import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
@@ -70,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static Bitmap noseFlip;
     public static ArrayList<Bitmap> bitmapArray;
+    private FaceDetector detector;
 
 
 
@@ -150,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
         noseFlip=null;
         bitmapArray = new ArrayList<Bitmap>();
 
+        detector = new FaceDetector.Builder(getApplicationContext())
+                .setTrackingEnabled(false)
+                .build();
 
 
         if(checkGooglePlayAvailability()) {
@@ -256,6 +264,7 @@ public class MainActivity extends AppCompatActivity {
     Matrix m;
     Canvas tempCanvas;
 
+
         @Override
         public void onPictureTaken(Bitmap picture) {
             Log.d(TAG, "Taken picture is here!");
@@ -268,82 +277,104 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            if ( picture.getHeight() < picture.getWidth()) {
-                Matrix rotate = new Matrix();
-                rotate.postRotate(-90);
-                noseCrop = Bitmap.createBitmap(picture, 0, 0, picture.getWidth(), picture.getHeight(), rotate, true);
-            }
-            else {
-                noseCrop = picture;
-            }
-            try {
-                //markerNew=mFaceGraphic.marker;
-                Log.d(TAG,"Bitmap Info:"+noseCrop.getHeight()+" "+noseCrop.getWidth());
-                //Log.d(TAG,"  "+noseWidth+"  "+noseHeight+"  "+" "+noseBit.getWidth()+" "+noseBit.getHeight());
 
-                Log.d(TAG,"Preview Info:"+mGraphicOverlay.mPreviewHeight+" "+mGraphicOverlay.mPreviewWidth);
-                Log.d(TAG,"Point values"+mFaceGraphic.p_leftEyePos+"  "+mFaceGraphic.p_rightEyePos+"  "+mFaceGraphic.p_faceCenter+"  "+mFaceGraphic.p_noseBasePos);
+            Frame frame = new Frame.Builder().setBitmap(picture).build();
+            SparseArray<Face> faces = detector.detect(frame);
 
-                if((mFaceGraphic.p_leftEyePos !=null)&&(mFaceGraphic.p_rightEyePos !=null)&&(mFaceGraphic.p_faceCenter !=null))
-                    {
-                        int height_factor = mGraphicOverlay.mPreviewHeight;
-                        int width_factor = mGraphicOverlay.mPreviewWidth;
-                        if (mGraphicOverlay.mFacing == CameraSource.CAMERA_FACING_FRONT) {
-                            noseWidth= Math.round(mFaceGraphic.p_leftEyePos.x) - Math.round(mFaceGraphic.p_rightEyePos.x);
-
-                        }
-                        else {
-                            noseWidth = Math.round(mFaceGraphic.p_rightEyePos.x) - Math.round(mFaceGraphic.p_leftEyePos.x);
-
-                        }
-                        noseHeight= Math.round(mFaceGraphic.p_noseBasePos.y)-Math.round(mFaceGraphic.p_faceCenter.y);
-
-
-                        int x = (int)((mFaceGraphic.p_faceCenter.x - noseWidth * 0.25) * (float)noseCrop.getWidth()/width_factor);
-
-                        int y = (int)((mFaceGraphic.p_faceCenter.y) * (float)noseCrop.getHeight()/height_factor);
-                        int w = (int)(((noseWidth) * (float)noseCrop.getWidth()/width_factor)*bBoxScaleFactor);
-                        int h = (int)(((noseHeight) * (float)noseCrop.getHeight()/height_factor)*bBoxScaleFactor);
-                        Log.d(TAG,"Draw values"+x+"  "+y+"  "+w/4 + "  "+h);
-
-
-                        noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h);
+            if(detector !=null){
+                Log.d("FACES"," "+faces.size()+" "+faces);
+                if(faces.size()>0){
+                    if ( picture.getHeight() < picture.getWidth()) {
+                        Matrix rotate = new Matrix();
+                        rotate.postRotate(-90);
+                        noseCrop = Bitmap.createBitmap(picture, 0, 0, picture.getWidth(), picture.getHeight(), rotate, true);
                     }
-                    m = new Matrix();
-                    m.preScale(-1, 1);
-                    noseFlip = Bitmap.createBitmap(noseBit, 0, 0, noseBit.getWidth(), noseBit.getHeight(), m, false);
-                    noseFlip.setDensity(DisplayMetrics.DENSITY_DEFAULT);
-                    Log.d(TAG,"  "+" "+noseFlip.getWidth()+" "+noseFlip.getHeight());
-                    bitmapArray.add(noseFlip);
-                    Log.d(TAG," "+bitmapArray.size());
-                if( noseFlip!=null) {
+                    else {
+                        noseCrop = picture;
+                    }
+                    try {
+                        //markerNew=mFaceGraphic.marker;
+                        Log.d(TAG,"Bitmap Info:"+noseCrop.getHeight()+" "+noseCrop.getWidth());
+                        //Log.d(TAG,"  "+noseWidth+"  "+noseHeight+"  "+" "+noseBit.getWidth()+" "+noseBit.getHeight());
 
-                    if (BitmapList.size() < person_store_count) {
-                        BitmapList.add(noseFlip);
-                    } else
+                        Log.d(TAG,"Preview Info:"+mGraphicOverlay.mPreviewHeight+" "+mGraphicOverlay.mPreviewWidth);
+                        Log.d(TAG,"Point values"+mFaceGraphic.p_leftEyePos+"  "+mFaceGraphic.p_rightEyePos+"  "+mFaceGraphic.p_faceCenter+"  "+mFaceGraphic.p_noseBasePos);
+
+                        if((mFaceGraphic.p_leftEyePos !=null)&&(mFaceGraphic.p_rightEyePos !=null)&&(mFaceGraphic.p_faceCenter !=null))
                         {
-                        Bitmap compare_bitmap;
+                            int height_factor = mGraphicOverlay.mPreviewHeight;
+                            int width_factor = mGraphicOverlay.mPreviewWidth;
+                            if (mGraphicOverlay.mFacing == CameraSource.CAMERA_FACING_FRONT) {
+                                noseWidth= Math.round(mFaceGraphic.p_leftEyePos.x) - Math.round(mFaceGraphic.p_rightEyePos.x);
 
-                        for (int i = 0; i < BitmapList.size(); i++) {
-                            compare_bitmap = BitmapList.get(i);
-                            float prev_resolution = compare_bitmap.getHeight() * compare_bitmap.getWidth();
-                            float curr_resolution = noseFlip.getHeight() * noseFlip.getWidth();
-                            if (curr_resolution >= prev_resolution) {
-                                BitmapList.set(i, noseFlip);
                             }
+                            else {
+                                noseWidth = Math.round(mFaceGraphic.p_rightEyePos.x) - Math.round(mFaceGraphic.p_leftEyePos.x);
+
+                            }
+                            noseHeight= Math.round(mFaceGraphic.p_noseBasePos.y)-Math.round(mFaceGraphic.p_faceCenter.y);
+
+
+                            int x = (int)((mFaceGraphic.p_faceCenter.x - noseWidth * 0.25) * (float)noseCrop.getWidth()/width_factor);
+
+                            int y = (int)((mFaceGraphic.p_faceCenter.y) * (float)noseCrop.getHeight()/height_factor);
+                            int w = (int)(((noseWidth) * (float)noseCrop.getWidth()/width_factor)*bBoxScaleFactor);
+                            int h = (int)(((noseHeight) * (float)noseCrop.getHeight()/height_factor)*bBoxScaleFactor);
+                            Log.d(TAG,"Draw values"+x+"  "+y+"  "+w/4 + "  "+h);
+
+
+                            noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h);
+                        }
+                        m = new Matrix();
+                        m.preScale(-1, 1);
+                        noseFlip = Bitmap.createBitmap(noseBit, 0, 0, noseBit.getWidth(), noseBit.getHeight(), m, false);
+                        noseFlip.setDensity(DisplayMetrics.DENSITY_DEFAULT);
+                        Log.d(TAG,"  "+" "+noseFlip.getWidth()+" "+noseFlip.getHeight());
+
+                        bitmapArray.add(noseFlip);
+
+                        //Log.d(TAG," "+bitmapArray.size());
+                        if( noseFlip!=null) {
+
+                            if (BitmapList.size() <= person_store_count) {
+                                BitmapList.add(noseFlip);
+                            } else
+                            {
+                                Bitmap compare_bitmap = null;
+
+                                for (int i = 0; i < BitmapList.size(); i++) {
+                                    compare_bitmap = BitmapList.get(i);
+                                    float prev_resolution = compare_bitmap.getHeight() * compare_bitmap.getWidth();
+                                    float curr_resolution = noseFlip.getHeight() * noseFlip.getWidth();
+                                    if (curr_resolution >= prev_resolution) {
+                                        BitmapList.set(i, noseFlip);
+                                    }
+                                }
+
+
+                            }
+                            Canvas tempCanvas = new Canvas();
+                            tempCanvas.drawBitmap(noseFlip, 0, 0, null);
+                            ivNoseCrop.setImageDrawable(new BitmapDrawable(getResources(), noseFlip));
+                            ivNoseCrop.setScaleType(ImageView.ScaleType.FIT_XY);
                         }
 
 
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    Canvas tempCanvas = new Canvas();
-                    tempCanvas.drawBitmap(noseFlip, 0, 0, null);
-                    ivNoseCrop.setImageDrawable(new BitmapDrawable(getResources(), noseFlip));
-                    ivNoseCrop.setScaleType(ImageView.ScaleType.FIT_XY);
+                }else{
+                  Log.d("FACES","No faces detected");
                 }
 
-            } catch (Exception e) {
-                e.printStackTrace();
+
+            }else{
+                Log.d("FACES","uh oh detector not created");
             }
+
+
+
+
         }
     };
     final CameraSource.VideoStartCallback cameraSourceVideoStartCallback = new CameraSource.VideoStartCallback() {
@@ -471,6 +502,8 @@ public class MainActivity extends AppCompatActivity {
             int noseWidth, noseHeight;
 
             FileOutputStream out = null;
+
+
             if ( picture.getHeight() < picture.getWidth()) {
                 Matrix rotate = new Matrix();
                 rotate.postRotate(-90);
