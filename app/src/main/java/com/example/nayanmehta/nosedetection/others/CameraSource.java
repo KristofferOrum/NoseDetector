@@ -26,7 +26,6 @@ import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.media.CamcorderProfile;
-import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Environment;
 import android.os.SystemClock;
@@ -152,7 +151,7 @@ public class CameraSource {
     private float mRequestedFps = 30.0f;
 
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
-    private MediaRecorder mediaRecorder;
+
     private String videoFile;
     private VideoStartCallback videoStartCallback;
     private VideoStopCallback videoStopCallback;
@@ -482,17 +481,7 @@ public class CameraSource {
         }
     }
 
-    /*
-    * Returns whether or not video can be recorded in specified quality
-    */
-    public boolean canRecordVideo(@VideoMode int videoMode) {
-        try {
-            CamcorderProfile.get(getIdForRequestedCamera(mFacing), videoMode);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
+
 
     /**
      * Returns the preview size that is currently in use by the underlying camera.
@@ -571,79 +560,7 @@ public class CameraSource {
         }
     }
 
-    /**
-     * Initiates recording video.
-     *
-     * @param videoStartCallback the callback for video recording start
-     * @param videoStopCallback the callback for video recording stop
-     * @param videoErrorCallback the callback for video recording error
-     */
-    public void recordVideo(@NonNull VideoStartCallback videoStartCallback, @NonNull VideoStopCallback videoStopCallback, @NonNull VideoErrorCallback videoErrorCallback) {
-        this.videoStartCallback = videoStartCallback;
-        this.videoStopCallback = videoStopCallback;
-        this.videoErrorCallback = videoErrorCallback;
-        if(!checkCamera()) {
-            this.videoErrorCallback.onVideoError("Camera Error");
-            return;
-        }
-        //PREPARE MEDIA RECORDER
-        int cameraId = getIdForRequestedCamera(mFacing);
-        //Step 0. Disable Shutter Sound
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            Camera.CameraInfo camInfo = new Camera.CameraInfo();
-            Camera.getCameraInfo(cameraId, camInfo);
-            if(camInfo.canDisableShutterSound) {
-                mCamera.enableShutterSound(false);
-            }
-        }
-        //Step 1. Unlock Camera
-        mCamera.unlock();
-        mediaRecorder = new MediaRecorder();
-        //Step 2. Create Camera Profile
-        CamcorderProfile profile;
-        try {
-            profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_720P);
-        } catch (Exception e) {
-            //CAMERA QUALITY TOO LOW!!!!!!!
-            releaseMediaRecorder();
-            this.videoErrorCallback.onVideoError("Camera quality too LOW");
-            return;
-        }
 
-        //Step 3. Set values in Profile except AUDIO settings
-        mediaRecorder.setCamera(mCamera);
-        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        mediaRecorder.setOutputFormat(profile.fileFormat);
-        mediaRecorder.setVideoEncoder(profile.videoCodec);
-        mediaRecorder.setVideoEncodingBitRate(profile.videoBitRate);
-        mediaRecorder.setVideoFrameRate(profile.videoFrameRate);
-        mediaRecorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
-
-        //Step 4. Set output file
-        videoFile = Environment.getExternalStorageDirectory() + "/" + formatter.format(new Date()) + ".mp4";
-        mediaRecorder.setOutputFile(videoFile);
-        //Step 5. Set Duration
-        mediaRecorder.setMaxDuration(-1);
-        try {
-            mediaRecorder.prepare();
-        } catch (IllegalStateException e) {
-            releaseMediaRecorder();
-            this.videoErrorCallback.onVideoError(e.getMessage());
-            return;
-        } catch (IOException e) {
-            releaseMediaRecorder();
-            this.videoErrorCallback.onVideoError(e.getMessage());
-            return;
-        }
-        mediaRecorder.start();
-        //SEND RECORDING SIGNAL!
-        this.videoStartCallback.onVideoStart();
-    }
-
-    public void stopVideo() {
-        releaseMediaRecorder();
-        this.videoStopCallback.onVideoStop(videoFile);
-    }
 
     /**
      * Gets the current focus mode setting.
@@ -1300,15 +1217,7 @@ public class CameraSource {
         return ByteBuffer.wrap(yuv);
     }
 
-    private void releaseMediaRecorder() {
-        if(mediaRecorder != null) {
-            mediaRecorder.stop();
-            mediaRecorder.reset();
-            mediaRecorder.release();
-            mediaRecorder = null;
-            mCamera.lock();
-        }
-    }
+
 
     private boolean checkCamera() {return (mCamera != null);}
 }

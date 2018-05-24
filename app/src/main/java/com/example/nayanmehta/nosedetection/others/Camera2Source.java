@@ -165,17 +165,11 @@ public class Camera2Source {
      */
     private Size mPreviewSize;
 
-    /**
-     * The {@link Size} of Media Recorder.
-     */
-    private Size mVideoSize;
 
-    private MediaRecorder mMediaRecorder;
+
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
-    private String videoFile;
-    private VideoStartCallback videoStartCallback;
-    private VideoStopCallback videoStopCallback;
-    private VideoErrorCallback videoErrorCallback;
+
+
 
     /**
      * ID of the current {@link CameraDevice}.
@@ -470,20 +464,6 @@ public class Camera2Source {
         void onPictureTaken(Image image);
     }
 
-    /**
-     * Callback interface used to indicate when video Recording Started.
-     */
-    public interface VideoStartCallback {
-        void onVideoStart();
-    }
-    public interface VideoStopCallback {
-        //Called when Video Recording stopped.
-        void onVideoStop(String videoFile);
-    }
-    public interface VideoErrorCallback {
-        //Called when error ocurred while recording video.
-        void onVideoError(String error);
-    }
 
     /**
      * Callback interface used to notify on completion of camera auto focus.
@@ -696,47 +676,7 @@ public class Camera2Source {
         lockFocus();
     }
 
-    public void recordVideo(VideoStartCallback videoStartCallback, VideoStopCallback videoStopCallback, VideoErrorCallback videoErrorCallback) {
-        try {
-            this.videoStartCallback = videoStartCallback;
-            this.videoStopCallback = videoStopCallback;
-            this.videoErrorCallback = videoErrorCallback;
-            if(mCameraDevice == null || !mTextureView.isAvailable() || mPreviewSize == null){
-                this.videoErrorCallback.onVideoError("Camera not ready.");
-                return;
-            }
-            videoFile = Environment.getExternalStorageDirectory() + "/" + formatter.format(new Date()) + ".mp4";
-            mMediaRecorder = new MediaRecorder();
-            //mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            mMediaRecorder.setOutputFile(videoFile);
-            mMediaRecorder.setVideoEncodingBitRate(10000000);
-            mMediaRecorder.setVideoFrameRate(30);
-            mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
-            mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-            //mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            if(swappedDimensions) {
-                mMediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(mDisplayOrientation));
-            } else {
-                mMediaRecorder.setOrientationHint(ORIENTATIONS.get(mDisplayOrientation));
-            }
-            mMediaRecorder.prepare();
-            closePreviewSession();
-            createCameraRecordSession();
-        } catch(IOException ex) {
-            Log.d(TAG, ex.getMessage());
-        }
-    }
 
-    public void stopVideo() {
-        //Stop recording
-        mMediaRecorder.stop();
-        mMediaRecorder.reset();
-        videoStopCallback.onVideoStop(videoFile);
-        closePreviewSession();
-        createCameraPreviewSession();
-    }
 
     private Size getBestAspectPictureSize(android.util.Size[] supportedPictureSizes) {
         float targetRatio = Utils.getScreenRatio(mContext);
@@ -840,23 +780,6 @@ public class Camera2Source {
         }
     }
 
-    /**
-     * We choose a video size with 3x4 aspect ratio. Also, we don't use sizes
-     * larger than 1080p, since MediaRecorder cannot handle such a high-resolution video.
-     *
-     * @param choices The list of available sizes
-     * @return The video size
-     */
-    private static Size chooseVideoSize(Size[] choices) {
-        for (Size size : choices) {
-            if (size.getWidth() == size.getHeight() * 16 / 9)
-            {
-                return size;
-            }
-        }
-        Log.e(TAG, "Couldn't find any suitable video size");
-        return choices[0];
-    }
 
     /**
      * Compares two {@code Size}s based on their areas.
@@ -982,7 +905,7 @@ public class Camera2Source {
             Size[] outputSizes = Utils.sizeToSize(map.getOutputSizes(SurfaceTexture.class));
             Size[] outputSizesMediaRecorder = Utils.sizeToSize(map.getOutputSizes(MediaRecorder.class));
             mPreviewSize = chooseOptimalSize(outputSizes, rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
-            mVideoSize = chooseVideoSize(outputSizesMediaRecorder);
+
 
             // We fit the aspect ratio of TextureView to the size of preview we picked.
             int orientation = mDisplayOrientation;
@@ -1167,68 +1090,7 @@ public class Camera2Source {
         }
     }
 
-    private void createCameraRecordSession() {
-        try {
-            SurfaceTexture texture = mTextureView.getSurfaceTexture();
-            assert texture != null;
 
-            // We configure the size of default buffer to be the size of camera preview we want.
-            texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-
-            mImageReaderPreview = ImageReader.newInstance(mPreviewSize.getWidth(), mPreviewSize.getHeight(), ImageFormat.YUV_420_888, 1);
-            mImageReaderPreview.setOnImageAvailableListener(mOnPreviewAvailableListener, mBackgroundHandler);
-
-            // This is the output Surface we need to start preview.
-            Surface surface = new Surface(texture);
-
-            // Set up Surface for the MediaRecorder
-            Surface recorderSurface = mMediaRecorder.getSurface();
-
-            // We set up a CaptureRequest.Builder with the output Surface.
-            mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
-            mPreviewRequestBuilder.addTarget(surface);
-            mPreviewRequestBuilder.addTarget(mImageReaderPreview.getSurface());
-            mPreviewRequestBuilder.addTarget(recorderSurface);
-
-            // Start a capture session
-            mCameraDevice.createCaptureSession(Arrays.asList(surface, mImageReaderPreview.getSurface(), recorderSurface), new CameraCaptureSession.StateCallback() {
-                @Override
-                public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
-                    // The camera is already closed
-                    if (mCameraDevice == null) {
-                        return;
-                    }
-
-                    // When the session is ready, we start displaying the preview.
-                    mCaptureSession = cameraCaptureSession;
-
-                    try {
-                        // Auto focus should be continuous for camera preview.
-                        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, mFocusMode);
-                        if(mFlashSupported) {
-                            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, mFlashMode);
-                        }
-
-                        // Finally, we start displaying the camera preview.
-                        mPreviewRequest = mPreviewRequestBuilder.build();
-                        mCaptureSession.setRepeatingRequest(mPreviewRequest, mCaptureCallback, mBackgroundHandler);
-                    } catch (CameraAccessException e) {
-                        e.printStackTrace();
-                    }
-
-                    //Start recording
-                    mMediaRecorder.start();
-                    videoStartCallback.onVideoStart();
-                }
-
-                @Override
-                public void onConfigureFailed(@NonNull CameraCaptureSession session) {
-                    Log.d(TAG, "Camera Configuration failed!");}
-            }, mBackgroundHandler);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * This runnable controls access to the underlying receiver, calling it to process frames when
