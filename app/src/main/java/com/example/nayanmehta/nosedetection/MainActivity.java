@@ -74,7 +74,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static Bitmap noseFlip;
     public static ArrayList<Bitmap> bitmapArray;
-    private FaceDetector detector;
+    public static ArrayList<Bitmap> pictureArray;
+    public FaceDetector detector;
 
 
 
@@ -150,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
         mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
         noseFlip=null;
         bitmapArray = new ArrayList<Bitmap>();
+        pictureArray= new ArrayList<Bitmap>();
 
         detector = new FaceDetector.Builder(getApplicationContext())
                 .setTrackingEnabled(false)
@@ -241,11 +243,9 @@ public class MainActivity extends AppCompatActivity {
                 rotate.postRotate(-90);
                 picture = Bitmap.createBitmap(picture, 0, 0, picture.getWidth(), picture.getHeight(), rotate, true);
             }
-            Frame frame = new Frame.Builder().setBitmap(picture).build();
-            SparseArray<Face> faces = detector.detect(frame);
-            if(detector !=null){
-                Log.d("FACES"," "+faces.size()+" "+faces);
-                if(faces.size() > 0){
+           /* Frame frame = new Frame.Builder().setBitmap(picture).build();
+            SparseArray<Face> faces = detector.detect(frame);*/
+
                     noseCrop = picture;
                     try {
                         //markerNew=mFaceGraphic.marker;
@@ -286,12 +286,30 @@ public class MainActivity extends AppCompatActivity {
                         noseFlip.setDensity(DisplayMetrics.DENSITY_DEFAULT);
                         Log.d(TAG,"  "+" "+noseFlip.getWidth()+" "+noseFlip.getHeight());
 
-                        bitmapArray.add(noseFlip);
+                        if(pictureArray.size() < 3){
+                            pictureArray.add(picture);
+                            bitmapArray.add(noseFlip);
+                        }else{
+
+                            pictureArray.set(0, pictureArray.get(1));
+                            pictureArray.set(1, pictureArray.get(2));
+                            pictureArray.set(2, picture);
+                            bitmapArray.set(0, bitmapArray.get(1));
+                            bitmapArray.set(1, bitmapArray.get(2));
+                            bitmapArray.set(2, noseFlip);
+//                         for(int picIndex=0;picIndex<pictureArray.size();picIndex++){
+//                             pictureArray.set(picIndex, picture);
+//                             bitmapArray.set(picIndex, noseFlip);
+//                         }
+
+                        }
+                        Log.d("Picture and Nose"," "+pictureArray.size()+" "+bitmapArray.size());
+
 
                         //Log.d(TAG," "+bitmapArray.size());
                         if( noseFlip!=null) {
 
-                            if (BitmapList.size() <= person_store_count) {
+                            if (BitmapList.size() < person_store_count) {
                                 BitmapList.add(noseFlip);
                             } else
                             {
@@ -318,17 +336,6 @@ public class MainActivity extends AppCompatActivity {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }else{
-                  Log.d("FACES","No faces detected");
-                }
-
-
-            }else{
-                Log.d("FACES","uh oh detector not created");
-            }
-
-
-
 
         }
     };
@@ -647,6 +654,8 @@ public class MainActivity extends AppCompatActivity {
                 BitmapList.clear();
             }
             mFaceGraphic.setId(faceId);
+            Log.d("OnNewItem"," "+bitmapArray+" "+pictureArray);
+
 
         }
 
@@ -669,9 +678,17 @@ public class MainActivity extends AppCompatActivity {
         public void onMissing(FaceDetector.Detections<Face> detectionResults) {
             mFaceGraphic.goneFace();
             mOverlay.remove(mFaceGraphic);
-            mFaceGraphic.idleState();
-            bitmapArray.subList(0, (bitmapArray.size()/2)).clear();
-            Log.d(TAG," "+bitmapArray);
+
+            for(int tempIndex=0;tempIndex < pictureArray.size();tempIndex++){
+                Frame frame = new Frame.Builder().setBitmap(pictureArray.get(tempIndex)).build();
+                SparseArray<Face> faces = detector.detect(frame);
+                Log.d("FACES"," "+faces.size());
+                if(faces.size() > 0){
+                    mFaceGraphic.idleState(tempIndex);
+                    Log.d(TAG," "+bitmapArray+" "+pictureArray);
+                }
+            }
+
 
         }
 

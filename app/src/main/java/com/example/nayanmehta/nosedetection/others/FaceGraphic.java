@@ -17,6 +17,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Looper;
 import android.util.Log;
+import android.util.SparseArray;
 import android.widget.Button;
 import android.widget.Toast;
 import android.os.Handler;
@@ -24,14 +25,17 @@ import android.os.Handler;
 import com.example.nayanmehta.nosedetection.others.GraphicOverlay;
 import com.example.nayanmehta.nosedetection.MainActivity;
 import com.example.nayanmehta.nosedetection.R;
+import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
 
 
 import static com.example.nayanmehta.nosedetection.MainActivity.ivNoseCrop;
+import static com.example.nayanmehta.nosedetection.MainActivity.pictureArray;
 import static com.example.nayanmehta.nosedetection.MainActivity.takePictureButton;
 import static com.example.nayanmehta.nosedetection.MainActivity.bitmapArray;
 import static com.example.nayanmehta.nosedetection.MainActivity.noseFlip;
+
 
 
 /**
@@ -168,14 +172,18 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
 
 
-    public void idleState(){
+    public void idleState(int tempIndex){
         Log.d("idle","Idle idle it's so idle");
-        if(bitmapArray.size() > 0)
-        {
-            int index = bitmapArray.size() -1;
-            Bitmap lastbitmap = bitmapArray.get(index);
-            ivNoseCrop.setImageBitmap(lastbitmap);
-        }
+        //int pictureIndex = pictureArray.size()-1;
+           Log.d("BitmapArray"," "+bitmapArray.size());
+            if(bitmapArray.size() > 0)
+            {
+                Bitmap lastbitmap = bitmapArray.get(tempIndex);
+                ivNoseCrop.setImageBitmap(lastbitmap);
+                Log.d("Idle Array"," "+bitmapArray+" "+pictureArray);
+
+            }
+            //Log.d("FACES"," "+faces.size()+" "+faces);
 
     }
 
@@ -273,7 +281,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             nosePreviewRect = new RectF((int)(faceCenter.x - noseWidth/2),(int)faceCenter.y ,(int)(faceCenter.x + noseWidth/2) ,(int)(faceCenter.y + noseHeight) );
             noseViewRect= translateRect(nosePreviewRect);
 
-            if(faceCenter != null)
+            /*if(faceCenter != null)
             canvas.drawBitmap(marker, faceCenter.x, faceCenter.y, null);
         if(noseBasePos != null)
             canvas.drawBitmap(marker, noseBasePos.x, noseBasePos.y, null);
@@ -298,7 +306,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         if(leftCheek != null)
             canvas.drawBitmap(marker, leftCheek.x, leftCheek.y, null);
         if(rightCheek != null)
-            canvas.drawBitmap(marker, rightCheek.x, rightCheek.y, null);
+            canvas.drawBitmap(marker, rightCheek.x, rightCheek.y, null);*/
 
             // Draws a circle at the position of the detected face, with the face's track id below.
             float x = translateX(face.getPosition().x + face.getWidth() / 2);
