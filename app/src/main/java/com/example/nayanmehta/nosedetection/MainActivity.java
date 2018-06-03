@@ -416,8 +416,11 @@ public class MainActivity extends AppCompatActivity {
                     int h = (int)(((noseHeight) * (float)noseCrop.getHeight()/height_factor)*bBoxScaleFactor);
                     Log.d(TAG,"Draw values"+x+"  "+y+"  "+w/4 + "  "+h);
 
+                    Matrix matrix= new Matrix();
+                    matrix.postRotate(mFaceGraphic.mFace.getEulerZ());
+                    noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h,matrix,true);
 
-                    noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h);
+
                 }
 
 
