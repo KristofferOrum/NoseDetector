@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
@@ -106,7 +107,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
 
 
-    private volatile Face mFace;
+    public volatile Face mFace;
 
     private Paint mFacePositionPaint;
     private Paint mIdPaint;
@@ -275,7 +276,17 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             int noseHeight = Math.round(noseBasePos.y) - Math.round(faceCenter.y);
 
             canvas.drawRect((int)(faceCenter.x - noseWidth/2), (int)faceCenter.y, (int)(faceCenter.x + noseWidth/2), (int)(faceCenter.y + noseHeight), mPaint);
-           // Log.d("FaceGraphic Class"," "+(faceCenter.x-noseWidth/2)+" "+faceCenter.y);
+
+            /* Rotating rectangle according to face orientation*/
+            RectF dest = new RectF((int) (faceCenter.x - noseWidth/2), (int) faceCenter.y, (int) (faceCenter.x + noseWidth/2), (int) (faceCenter.y + noseHeight));
+            Matrix m=new Matrix();
+            m.setRotate(face.getEulerZ(),dest.centerX(),dest.centerY());
+            m.mapRect(dest);
+            canvas.drawRect(dest,mBoxPaint);
+
+
+
+            // Log.d("FaceGraphic Class"," "+(faceCenter.x-noseWidth/2)+" "+faceCenter.y);
               Log.d(" "," "+(faceCenter.x - noseWidth/2)+" "+faceCenter.y);
 
             nosePreviewRect = new RectF((int)(faceCenter.x - noseWidth/2),(int)faceCenter.y ,(int)(faceCenter.x + noseWidth/2) ,(int)(faceCenter.y + noseHeight) );
@@ -316,14 +327,14 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
 
             // Draws a bounding box around the face.
-            float xOffset = scaleX(face.getWidth() / 2.0f);
-            float yOffset = scaleY(face.getHeight() / 2.0f);
-            float left = x - xOffset;
-            float top = y - yOffset;
-            float right = x + xOffset;
-            float bottom = y + yOffset;
-            canvas.drawRect(left, top, right, bottom, mBoxPaint);
-            Log.d("","Offset"+xOffset+" "+yOffset);
+//            float xOffset = scaleX(face.getWidth() / 2.0f);
+//            float yOffset = scaleY(face.getHeight() / 2.0f);
+//            float left = x - xOffset;
+//            float top = y - yOffset;
+//            float right = x + xOffset;
+//            float bottom = y + yOffset;
+//            canvas.drawRect(left, top, right, bottom, mBoxPaint);
+//            Log.d("","Offset"+xOffset+" "+yOffset);
 
 
             try {
