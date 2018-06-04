@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.Image;
 import android.nfc.Tag;
@@ -49,6 +50,8 @@ import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -77,10 +80,6 @@ public class MainActivity extends AppCompatActivity {
     public static ArrayList<Bitmap> pictureArray;
     public FaceDetector detector;
 
-
-    /*
-    Here here
-     */
 
 
 
@@ -228,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
     int noseWidth, noseHeight;
     int noseX,noseY;
     Matrix m;
+    Matrix matrix;
     Canvas tempCanvas;
 
 
@@ -282,6 +282,14 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG,"Draw values"+x+"  "+y+"  "+w/4 + "  "+h);
 
 
+
+//                            RectF dest = new RectF(x-w/2,y,x+w/2,y+h);
+//                            matrix=new Matrix();
+//                            matrix.setRotate(mFaceGraphic.mFace.getEulerZ(),dest.centerX(),dest.centerY());
+//                            matrix.mapRect(dest);
+//
+//                            Log.d(TAG,"EulerZ"+mFaceGraphic.mFace.getEulerZ());
+//                            noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h,matrix,true);
                             noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h);
                         }
                         m = new Matrix();
@@ -373,6 +381,7 @@ public class MainActivity extends AppCompatActivity {
             Bitmap noseFlip= null;
             Bitmap noseCrop= null;
             Matrix m;
+            Matrix matrix;
             int noseWidth, noseHeight;
 
             FileOutputStream out = null;
@@ -416,7 +425,7 @@ public class MainActivity extends AppCompatActivity {
                     int h = (int)(((noseHeight) * (float)noseCrop.getHeight()/height_factor)*bBoxScaleFactor);
                     Log.d(TAG,"Draw values"+x+"  "+y+"  "+w/4 + "  "+h);
 
-                    Matrix matrix= new Matrix();
+                    matrix= new Matrix();
                     matrix.postRotate(mFaceGraphic.mFace.getEulerZ());
                     noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h,matrix,true);
 
@@ -508,7 +517,7 @@ public class MainActivity extends AppCompatActivity {
         previewFaceDetector = new FaceDetector.Builder(context)
                 .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
                 .setLandmarkType(FaceDetector.ALL_LANDMARKS)
-                .setMode(FaceDetector.FAST_MODE)
+                .setMode(FaceDetector.ACCURATE_MODE)
                 .setProminentFaceOnly(true)
                 .setTrackingEnabled(true)
                 .build();

@@ -339,6 +339,8 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
             try {
                 takePictureButton.performClick();
+//                Log.d(TAG,"EulerZ:"+mFace.getEulerZ());
+//                Log.d(TAG,"EulerY:"+mFace.getEulerY());
 
             }
             catch (Exception e){
