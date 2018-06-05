@@ -275,7 +275,6 @@ public class MainActivity extends AppCompatActivity {
 
 
                             int x = (int)((mFaceGraphic.p_faceCenter.x - noseWidth * 0.25) * (float)noseCrop.getWidth()/width_factor);
-
                             int y = (int)((mFaceGraphic.p_faceCenter.y) * (float)noseCrop.getHeight()/height_factor);
                             int w = (int)(((noseWidth) * (float)noseCrop.getWidth()/width_factor)*bBoxScaleFactor);
                             int h = (int)(((noseHeight) * (float)noseCrop.getHeight()/height_factor)*bBoxScaleFactor);
@@ -651,14 +650,14 @@ public class MainActivity extends AppCompatActivity {
 
             if (BitmapList.size() > 0 ){
 
-                for (int i=0; i < BitmapList.size(); i++){
-                    cameraFile= "/" + formatter.format(new Date()) + "_"+ (faceId - 1) + "_" + i +".png";
+//                for (int i=0; i < BitmapList.size(); i++){
+                    cameraFile= "/" + formatter.format(new Date()) + "_"+ (faceId - 1) + "_" + 0 +".png";
                     lastsavedID = faceId - 1;
                     currentFaceID = faceId;
                     try {
                         Log.d("Image_Saved:", cameraFile);
                         out = new FileOutputStream(new File(f, cameraFile));
-                        Bitmap save_image = BitmapList.get(i);
+                        Bitmap save_image = BitmapList.get(0);
                         save_image.compress(Bitmap.CompressFormat.JPEG, 95, out);
 
                     }
@@ -666,7 +665,7 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
-                }
+//                }
                 BitmapList.clear();
             }
             mFaceGraphic.setId(faceId);

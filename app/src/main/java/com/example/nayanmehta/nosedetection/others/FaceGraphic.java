@@ -177,13 +177,13 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         Log.d("idle","Idle idle it's so idle");
         //int pictureIndex = pictureArray.size()-1;
            Log.d("BitmapArray"," "+bitmapArray.size());
-            if(bitmapArray.size() > 0)
-            {
-                Bitmap lastbitmap = bitmapArray.get(tempIndex);
+//            if(bitmapArray.size() > 0)
+//            {
+                Bitmap lastbitmap = bitmapArray.get(0);
                 ivNoseCrop.setImageBitmap(lastbitmap);
                 Log.d("Idle Array"," "+bitmapArray+" "+pictureArray);
 
-            }
+//            }
             //Log.d("FACES"," "+faces.size()+" "+faces);
 
     }
