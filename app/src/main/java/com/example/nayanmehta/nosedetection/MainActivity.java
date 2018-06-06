@@ -345,6 +345,17 @@ public class MainActivity extends AppCompatActivity {
     };
 
     final Camera2Source.PictureCallback camera2SourcePictureCallback = new Camera2Source.PictureCallback() {
+
+        Bitmap noseBit=null;
+
+        Bitmap noseCrop=null;
+        Bitmap noseFinal=null;
+        int noseWidth, noseHeight;
+        int noseX,noseY;
+        Matrix m;
+        Matrix matrix;
+        Canvas tempCanvas;
+
         @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
         public void onPictureTaken(Image image) {
@@ -352,34 +363,24 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
                     takePictureButton.setEnabled(true);
                 }
             });
-
-
             ByteBuffer buffer = image.getPlanes()[0].getBuffer();
             byte[] bytes = new byte[buffer.capacity()];
             buffer.get(bytes);
             Bitmap picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, null);
-            Bitmap noseBit= null;
-            Bitmap noseFlip= null;
-            Bitmap noseCrop= null;
-            Matrix m;
-            Matrix matrix;
-            int noseWidth, noseHeight;
-
-            FileOutputStream out = null;
-
+            image.close();
 
             if ( picture.getHeight() < picture.getWidth()) {
                 Matrix rotate = new Matrix();
                 rotate.postRotate(-90);
-                noseCrop = Bitmap.createBitmap(picture, 0, 0, picture.getWidth(), picture.getHeight(), rotate, true);
+                picture = Bitmap.createBitmap(picture, 0, 0, picture.getWidth(), picture.getHeight(), rotate, true);
             }
-            else {
-                noseCrop = picture;
-            }
+           /* Frame frame = new Frame.Builder().setBitmap(picture).build();
+            SparseArray<Face> faces = detector.detect(frame);*/
+
+            noseCrop = picture;
             try {
                 //markerNew=mFaceGraphic.marker;
                 Log.d(TAG,"Bitmap Info:"+noseCrop.getHeight()+" "+noseCrop.getWidth());
@@ -404,69 +405,63 @@ public class MainActivity extends AppCompatActivity {
 
 
                     int x = (int)((mFaceGraphic.p_faceCenter.x - noseWidth * 0.25) * (float)noseCrop.getWidth()/width_factor);
-
                     int y = (int)((mFaceGraphic.p_faceCenter.y) * (float)noseCrop.getHeight()/height_factor);
                     int w = (int)(((noseWidth) * (float)noseCrop.getWidth()/width_factor)*bBoxScaleFactor);
                     int h = (int)(((noseHeight) * (float)noseCrop.getHeight()/height_factor)*bBoxScaleFactor);
                     Log.d(TAG,"Draw values"+x+"  "+y+"  "+w/4 + "  "+h);
 
-                    matrix= new Matrix();
-                    matrix.postRotate(mFaceGraphic.mFace.getEulerZ());
-                    noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h,matrix,true);
 
 
+//                            RectF dest = new RectF(x-w/2,y,x+w/2,y+h);
+//                            matrix=new Matrix();
+//                            matrix.setRotate(mFaceGraphic.mFace.getEulerZ(),dest.centerX(),dest.centerY());
+//                            matrix.mapRect(dest);
+//
+//                            Log.d(TAG,"EulerZ"+mFaceGraphic.mFace.getEulerZ());
+//                            noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h,matrix,true);
+                    noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h);
                 }
-
-
                 m = new Matrix();
                 m.preScale(-1, 1);
                 noseFlip = Bitmap.createBitmap(noseBit, 0, 0, noseBit.getWidth(), noseBit.getHeight(), m, false);
                 noseFlip.setDensity(DisplayMetrics.DENSITY_DEFAULT);
                 Log.d(TAG,"  "+" "+noseFlip.getWidth()+" "+noseFlip.getHeight());
-                bitmapArray.add(noseFlip);
-                Log.d(TAG," "+bitmapArray.size());
 
-                if( noseFlip!=null)
-                {
+                if(pictureArray.size() < 3){
+                    pictureArray.add(picture);
+                    bitmapArray.add(noseFlip);
+                }else{
+
+                    pictureArray.set(0, pictureArray.get(1));
+                    pictureArray.set(1, pictureArray.get(2));
+                    pictureArray.set(2, picture);
+                    bitmapArray.set(0, bitmapArray.get(1));
+                    bitmapArray.set(1, bitmapArray.get(2));
+                    bitmapArray.set(2, noseFlip);
+//                         for(int picIndex=0;picIndex<pictureArray.size();picIndex++){
+//                             pictureArray.set(picIndex, picture);
+//                             bitmapArray.set(picIndex, noseFlip);
+//                         }
+
+                }
+                Log.d("Picture and Nose"," "+pictureArray.size()+" "+bitmapArray.size());
+
+
+                //Log.d(TAG," "+bitmapArray.size());
+                if( noseFlip!=null) {
 
                     if (BitmapList.size() < person_store_count) {
                         BitmapList.add(noseFlip);
-                    }
-                    else{
-                        Bitmap compare_bitmap = null;
-
-                        for (int i=0; i < BitmapList.size(); i++){
-                        compare_bitmap = BitmapList.get(i);
-                        float prev_resolution = compare_bitmap.getHeight() * compare_bitmap.getWidth();
-                            float curr_resolution = noseFlip.getHeight() * noseFlip.getWidth();
-                        if ( curr_resolution >= prev_resolution ){
-                            BitmapList.set(i, noseFlip);
-                        }
-                        }
-
-
-
                     }
                     Canvas tempCanvas = new Canvas();
                     tempCanvas.drawBitmap(noseFlip, 0, 0, null);
                     ivNoseCrop.setImageDrawable(new BitmapDrawable(getResources(), noseFlip));
                     ivNoseCrop.setScaleType(ImageView.ScaleType.FIT_XY);
+                }
 
-                }
-                else{
-                    picture.compress(Bitmap.CompressFormat.JPEG, 95, out);
-                }
 
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                try {
-                    if (out != null) {
-                        out.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }
     };
@@ -649,6 +644,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                     catch (Exception e) {
                         e.printStackTrace();
+                    }finally {
+                        try {
+                            if (out != null) {
+                                out.close();
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
 
 //                }
