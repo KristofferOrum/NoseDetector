@@ -322,20 +322,6 @@ public class MainActivity extends AppCompatActivity {
 
                             if (BitmapList.size() < person_store_count) {
                                 BitmapList.add(noseFlip);
-                            } else
-                            {
-                                Bitmap compare_bitmap = null;
-
-                                for (int i = 0; i < BitmapList.size(); i++) {
-                                    compare_bitmap = BitmapList.get(i);
-                                    float prev_resolution = compare_bitmap.getHeight() * compare_bitmap.getWidth();
-                                    float curr_resolution = noseFlip.getHeight() * noseFlip.getWidth();
-                                    if (curr_resolution >= prev_resolution) {
-                                        BitmapList.set(i, noseFlip);
-                                    }
-                                }
-
-
                             }
                             Canvas tempCanvas = new Canvas();
                             tempCanvas.drawBitmap(noseFlip, 0, 0, null);
