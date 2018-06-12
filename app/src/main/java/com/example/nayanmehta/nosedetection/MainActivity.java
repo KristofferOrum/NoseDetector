@@ -79,8 +79,7 @@ public class MainActivity extends AppCompatActivity {
     public static ArrayList<Bitmap> bitmapArray;
     public static ArrayList<Bitmap> pictureArray;
     public FaceDetector detector;
-
-
+    public static boolean idleFlag;
 
 
     /*
@@ -107,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isRecordingVideo = false;
     public static Button takePictureButton;
     private String cameraFile;
-    private ArrayList<Bitmap> BitmapList = new ArrayList<Bitmap>();
+    public static ArrayList<Bitmap> BitmapList = new ArrayList<Bitmap>();
     private int person_store_count = 1;
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
 
@@ -116,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
 
     // MUST BE CAREFUL USING THIS VARIABLE.
     // ANY ATTEMPT TO START CAMERA2 ON API < 21 WILL CRASH.
-    public boolean useCamera2 = false;
+    public boolean useCamera2 = true;
 
     private View getDecorView() {
         return getWindow().getDecorView();
@@ -155,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
         noseFlip=null;
         bitmapArray = new ArrayList<Bitmap>();
         pictureArray= new ArrayList<Bitmap>();
+        idleFlag=false;
 
         detector = new FaceDetector.Builder(getApplicationContext())
                 .setTrackingEnabled(false)
@@ -325,8 +325,11 @@ public class MainActivity extends AppCompatActivity {
                             }
                             Canvas tempCanvas = new Canvas();
                             tempCanvas.drawBitmap(noseFlip, 0, 0, null);
-                            ivNoseCrop.setImageDrawable(new BitmapDrawable(getResources(), noseFlip));
-                            ivNoseCrop.setScaleType(ImageView.ScaleType.FIT_XY);
+                            if(!idleFlag){
+                                ivNoseCrop.setImageDrawable(new BitmapDrawable(getResources(), noseFlip));
+                                ivNoseCrop.setScaleType(ImageView.ScaleType.FIT_XY);
+                            }
+
                         }
 
 
@@ -455,8 +458,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                     Canvas tempCanvas = new Canvas();
                     tempCanvas.drawBitmap(noseFlip, 0, 0, null);
-                    ivNoseCrop.setImageDrawable(new BitmapDrawable(getResources(), noseFlip));
-                    ivNoseCrop.setScaleType(ImageView.ScaleType.FIT_XY);
+                    if(!idleFlag){
+                        ivNoseCrop.setImageDrawable(new BitmapDrawable(getResources(), noseFlip));
+                        ivNoseCrop.setScaleType(ImageView.ScaleType.FIT_XY);
+                    }
+
                 }
 
 
@@ -659,7 +665,7 @@ public class MainActivity extends AppCompatActivity {
             }
             mFaceGraphic.setId(faceId);
             Log.d("OnNewItem"," "+bitmapArray+" "+pictureArray);
-
+            idleFlag=false;
 
         }
 
@@ -670,7 +676,7 @@ public class MainActivity extends AppCompatActivity {
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
             mOverlay.add(mFaceGraphic);
             mFaceGraphic.updateFace(face);
-
+            idleFlag=false;
         }
 
         /**
@@ -683,15 +689,17 @@ public class MainActivity extends AppCompatActivity {
             mFaceGraphic.goneFace();
             mOverlay.remove(mFaceGraphic);
 
-            for(int tempIndex=0;tempIndex < pictureArray.size();tempIndex++){
-                Frame frame = new Frame.Builder().setBitmap(pictureArray.get(tempIndex)).build();
-                SparseArray<Face> faces = detector.detect(frame);
-                Log.d("FACES"," "+faces.size());
-                if(faces.size() > 0){
-                    mFaceGraphic.idleState(tempIndex);
-                    Log.d(TAG," "+bitmapArray+" "+pictureArray);
-                }
-            }
+//            for(int tempIndex=0;tempIndex < pictureArray.size();tempIndex++){
+//                Frame frame = new Frame.Builder().setBitmap(pictureArray.get(tempIndex)).build();
+//                SparseArray<Face> faces = detector.detect(frame);
+//                Log.d("FACES"," "+faces.size());
+//                if(faces.size() > 0){
+                    idleFlag=true;
+                    mFaceGraphic.idleState();
+
+////                    Log.d(TAG," "+bitmapArray+" "+pictureArray);
+//                }
+//            }
 
 
         }
@@ -704,6 +712,7 @@ public class MainActivity extends AppCompatActivity {
         public void onDone() {
             mFaceGraphic.goneFace();
             mOverlay.remove(mFaceGraphic);
+            idleFlag=true;
         }
     }
 

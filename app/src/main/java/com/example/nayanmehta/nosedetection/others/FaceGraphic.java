@@ -34,7 +34,8 @@ import com.google.android.gms.vision.face.Landmark;
 import static com.example.nayanmehta.nosedetection.MainActivity.ivNoseCrop;
 import static com.example.nayanmehta.nosedetection.MainActivity.pictureArray;
 import static com.example.nayanmehta.nosedetection.MainActivity.takePictureButton;
-import static com.example.nayanmehta.nosedetection.MainActivity.bitmapArray;
+import static com.example.nayanmehta.nosedetection.MainActivity.BitmapList;
+import static com.example.nayanmehta.nosedetection.MainActivity.idleFlag;
 import static com.example.nayanmehta.nosedetection.MainActivity.noseFlip;
 
 
@@ -173,15 +174,18 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
 
 
-    public void idleState(int tempIndex){
-        Log.d("idle","Idle idle it's so idle");
+    public void idleState(){
+        Log.d("idle","Idle idle it's so idle"+idleFlag);
         //int pictureIndex = pictureArray.size()-1;
-           Log.d("BitmapArray"," "+bitmapArray.size());
+//           Log.d("BitmapArray"," "+bitmapArray.size());
 //            if(bitmapArray.size() > 0)
 //            {
-                Bitmap lastbitmap = bitmapArray.get(0);
-                ivNoseCrop.setImageBitmap(lastbitmap);
-                Log.d("Idle Array"," "+bitmapArray+" "+pictureArray);
+               if(BitmapList.size()>0){
+                   Bitmap lastbitmap = BitmapList.get(0);
+                   ivNoseCrop.setImageBitmap(lastbitmap);
+               }
+
+//                Log.d("Idle Array"," "+bitmapArray+" "+pictureArray);
 
 //            }
             //Log.d("FACES"," "+faces.size()+" "+faces);
@@ -336,9 +340,13 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 //            canvas.drawRect(left, top, right, bottom, mBoxPaint);
 //            Log.d("","Offset"+xOffset+" "+yOffset);
 
-
+           Log.d("mFace"," "+mFace+" "+idleFlag);
             try {
-                takePictureButton.performClick();
+                    if((mFace != null)&&(idleFlag == false)) {
+                        takePictureButton.performClick();
+                    }
+
+
 //                Log.d(TAG,"EulerZ:"+mFace.getEulerZ());
 //                Log.d(TAG,"EulerY:"+mFace.getEulerY());
 
