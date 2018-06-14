@@ -60,7 +60,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -74,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     public static ImageView ivNoseCrop;
     private int lastsavedID;
     private int currentFaceID;
+    private Timer autoUpdate;
 
     public static Bitmap noseFlip;
     public static ArrayList<Bitmap> bitmapArray;
@@ -792,7 +794,6 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 startCameraSource();
             }
-
     }
 
     @Override
@@ -836,7 +837,36 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    public void onStart() {
+        super.onStart();
+        handler.removeCallbacks(runnableCode);
+        handler.postDelayed(runnableCode,10000*6*30);
+    }
+    public void recreate(){
+        if (android.os.Build.VERSION.SDK_INT >= 11)
+        {
+            super.recreate();
+        }
+        else
+        {
+            startActivity(getIntent());
+            finish();
+        }
+    }
+    // Create the Handler object (on the main thread by default)
+    Handler handler = new Handler();
+    // Define the code block to be executed
+    private Runnable runnableCode = new Runnable() {
+        @Override
+        public void run() {
+            // Do something here on the main thread
+            Log.d("Handlers", "Called on main thread");
+            Toast.makeText(MainActivity.this, "Refreshing application...", Toast.LENGTH_LONG).show();
+            recreate();
 
+
+        }
+    };
 
 
 }
