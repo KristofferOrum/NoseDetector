@@ -57,12 +57,16 @@
         android:visibility="gone"
         android:text="AutoFocus"
         />
-
+    <ImageView
+        android:id="@+id/ivBlankScreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorBlack"
+        android:adjustViewBounds="true"/>
     <ImageView
         android:id="@+id/ivNoseCrop"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:adjustViewBounds="true" />
-
 
 </FrameLayout>

@@ -188,6 +188,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void updateUI() {
+        if(BitmapList.size()>0){
+            Bitmap lastbitmap = BitmapList.get(0);
+            ivNoseCrop.setImageBitmap(lastbitmap);
+        }
         final View decorView = getWindow().getDecorView();
         decorView.setOnSystemUiVisibilityChangeListener (new View.OnSystemUiVisibilityChangeListener() {
             @Override
@@ -223,7 +227,6 @@ public class MainActivity extends AppCompatActivity {
     final CameraSource.ShutterCallback cameraSourceShutterCallback = new CameraSource.ShutterCallback() {@Override public void onShutter() {Log.d(TAG, "Shutter Callback!");}};
     final CameraSource.PictureCallback cameraSourcePictureCallback = new CameraSource.PictureCallback() {
     Bitmap noseBit=null;
-
     Bitmap noseCrop=null;
     Bitmap noseFinal=null;
     int noseWidth, noseHeight;
@@ -235,7 +238,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onPictureTaken(Bitmap picture) {
-            Log.d(TAG, "Taken picture is here!");
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -840,7 +842,7 @@ public class MainActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         handler.removeCallbacks(runnableCode);
-        handler.postDelayed(runnableCode,10000*6*30);
+        handler.postDelayed(runnableCode,10000*6*15);
     }
     public void recreate(){
         if (android.os.Build.VERSION.SDK_INT >= 11)
@@ -863,8 +865,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Handlers", "Called on main thread");
             Toast.makeText(MainActivity.this, "Refreshing application...", Toast.LENGTH_LONG).show();
             recreate();
-
-
         }
     };
 
