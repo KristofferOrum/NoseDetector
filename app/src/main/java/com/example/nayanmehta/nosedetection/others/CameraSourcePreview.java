@@ -214,7 +214,7 @@ public class CameraSourcePreview extends ViewGroup {
             }
         }
 
-        //RESIZE PREVIEW IGNORING ASPECT RATIO. THIS IS ESSENTIAL.
+        //RESIZE PREVIEW IGNORING ASPECT RATIO
         int newWidth = (height * screenWidth) / screenHeight;
 
         final int layoutWidth = right - left;

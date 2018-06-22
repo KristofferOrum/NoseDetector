@@ -50,7 +50,6 @@ import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -61,7 +60,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Timer;
-import java.util.TimerTask;
+
 
 
 public class MainActivity extends AppCompatActivity {
@@ -75,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     public static ImageView ivNoseCrop;
     private int lastsavedID;
     private int currentFaceID;
-    private Timer autoUpdate;
+
 
     public static Bitmap noseFlip;
     public static ArrayList<Bitmap> bitmapArray;
@@ -85,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     /*
-    * Use the bBoxScaleFactor to change the size of the
+    * Use the bBoxScaleFactor to change the size of the cropped ROI
     *
     * */
     private double bBoxScaleFactor= 1.0;
@@ -93,30 +92,30 @@ public class MainActivity extends AppCompatActivity {
     private ScaleGestureDetector mScaleGestureDetector;
     private float mScaleFactor = 1.0f;
 
-    // CAMERA VERSION ONE DECLARATIONS
+    // Camera API source
     private CameraSource mCameraSource = null;
 
-    // CAMERA VERSION TWO DECLARATIONS
+    // Camera2 API source
     private Camera2Source mCamera2Source = null;
 
-    // COMMON TO BOTH CAMERAS
+    // Common attributes for both APIs
     private CameraSourcePreview mPreview;
     public FaceDetector previewFaceDetector = null;
     private GraphicOverlay mGraphicOverlay;
     private FaceGraphic mFaceGraphic;
     private boolean wasActivityResumed = false;
-    private boolean isRecordingVideo = false;
+
     public static Button takePictureButton;
     private String cameraFile;
     public static ArrayList<Bitmap> BitmapList = new ArrayList<Bitmap>();
     private int person_store_count = 1;
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
 
-    // DEFAULT CAMERA BEING OPENED
+    // Set Front Camera as the default
     private boolean usingFrontCamera = true;
 
-    // MUST BE CAREFUL USING THIS VARIABLE.
-    // ANY ATTEMPT TO START CAMERA2 ON API < 21 WILL CRASH.
+    // Flag used to access Camera2 API
+    // Any attempts to run on API < 21 will result in the application crashing
     public boolean useCamera2 = true;
 
     private View getDecorView() {
@@ -167,7 +166,6 @@ public class MainActivity extends AppCompatActivity {
             requestPermissionThenOpenCamera();
 
 
-
             takePictureButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -213,6 +211,9 @@ public class MainActivity extends AppCompatActivity {
         mScaleGestureDetector.onTouchEvent(motionEvent);
         return true;
     }
+    /*
+    Changes scale of cropped ROI on pinch for zoom in/out
+     */
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector scaleGestureDetector){
@@ -251,15 +252,12 @@ public class MainActivity extends AppCompatActivity {
                 rotate.postRotate(-90);
                 picture = Bitmap.createBitmap(picture, 0, 0, picture.getWidth(), picture.getHeight(), rotate, true);
             }
-           /* Frame frame = new Frame.Builder().setBitmap(picture).build();
-            SparseArray<Face> faces = detector.detect(frame);*/
+
 
                     noseCrop = picture;
                     try {
-                        //markerNew=mFaceGraphic.marker;
-                        Log.d(TAG,"Bitmap Info:"+noseCrop.getHeight()+" "+noseCrop.getWidth());
-                        //Log.d(TAG,"  "+noseWidth+"  "+noseHeight+"  "+" "+noseBit.getWidth()+" "+noseBit.getHeight());
 
+                        Log.d(TAG,"Bitmap Info:"+noseCrop.getHeight()+" "+noseCrop.getWidth());
                         Log.d(TAG,"Preview Info:"+mGraphicOverlay.mPreviewHeight+" "+mGraphicOverlay.mPreviewWidth);
                         Log.d(TAG,"Point values"+mFaceGraphic.p_leftEyePos+"  "+mFaceGraphic.p_rightEyePos+"  "+mFaceGraphic.p_faceCenter+"  "+mFaceGraphic.p_noseBasePos);
 
@@ -283,16 +281,6 @@ public class MainActivity extends AppCompatActivity {
                             int w = (int)(((noseWidth) * (float)noseCrop.getWidth()/width_factor)*bBoxScaleFactor);
                             int h = (int)(((noseHeight) * (float)noseCrop.getHeight()/height_factor)*bBoxScaleFactor);
                             Log.d(TAG,"Draw values"+x+"  "+y+"  "+w/4 + "  "+h);
-
-
-
-//                            RectF dest = new RectF(x-w/2,y,x+w/2,y+h);
-//                            matrix=new Matrix();
-//                            matrix.setRotate(mFaceGraphic.mFace.getEulerZ(),dest.centerX(),dest.centerY());
-//                            matrix.mapRect(dest);
-//
-//                            Log.d(TAG,"EulerZ"+mFaceGraphic.mFace.getEulerZ());
-//                            noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h,matrix,true);
                             noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h);
                         }
                         m = new Matrix();
@@ -384,15 +372,12 @@ public class MainActivity extends AppCompatActivity {
                 rotate.postRotate(-90);
                 picture = Bitmap.createBitmap(picture, 0, 0, picture.getWidth(), picture.getHeight(), rotate, true);
             }
-           /* Frame frame = new Frame.Builder().setBitmap(picture).build();
-            SparseArray<Face> faces = detector.detect(frame);*/
+
 
             noseCrop = picture;
             try {
-                //markerNew=mFaceGraphic.marker;
-                Log.d(TAG,"Bitmap Info:"+noseCrop.getHeight()+" "+noseCrop.getWidth());
-                //Log.d(TAG,"  "+noseWidth+"  "+noseHeight+"  "+" "+noseBit.getWidth()+" "+noseBit.getHeight());
 
+                Log.d(TAG,"Bitmap Info:"+noseCrop.getHeight()+" "+noseCrop.getWidth());
                 Log.d(TAG,"Preview Info:"+mGraphicOverlay.mPreviewHeight+" "+mGraphicOverlay.mPreviewWidth);
                 Log.d(TAG,"Point values"+mFaceGraphic.p_leftEyePos+"  "+mFaceGraphic.p_rightEyePos+"  "+mFaceGraphic.p_faceCenter+"  "+mFaceGraphic.p_noseBasePos);
 
@@ -416,16 +401,6 @@ public class MainActivity extends AppCompatActivity {
                     int w = (int)(((noseWidth) * (float)noseCrop.getWidth()/width_factor)*bBoxScaleFactor);
                     int h = (int)(((noseHeight) * (float)noseCrop.getHeight()/height_factor)*bBoxScaleFactor);
                     Log.d(TAG,"Draw values"+x+"  "+y+"  "+w/4 + "  "+h);
-
-
-
-//                            RectF dest = new RectF(x-w/2,y,x+w/2,y+h);
-//                            matrix=new Matrix();
-//                            matrix.setRotate(mFaceGraphic.mFace.getEulerZ(),dest.centerX(),dest.centerY());
-//                            matrix.mapRect(dest);
-//
-//                            Log.d(TAG,"EulerZ"+mFaceGraphic.mFace.getEulerZ());
-//                            noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h,matrix,true);
                     noseBit= Bitmap.createBitmap(noseCrop, x, y,w/2,h);
                 }
                 m = new Matrix();
@@ -692,20 +667,8 @@ public class MainActivity extends AppCompatActivity {
         public void onMissing(FaceDetector.Detections<Face> detectionResults) {
             mFaceGraphic.goneFace();
             mOverlay.remove(mFaceGraphic);
-
-//            for(int tempIndex=0;tempIndex < pictureArray.size();tempIndex++){
-//                Frame frame = new Frame.Builder().setBitmap(pictureArray.get(tempIndex)).build();
-//                SparseArray<Face> faces = detector.detect(frame);
-//                Log.d("FACES"," "+faces.size());
-//                if(faces.size() > 0){
                     idleFlag=true;
                     mFaceGraphic.idleState();
-
-////                    Log.d(TAG," "+bitmapArray+" "+pictureArray);
-//                }
-//            }
-
-
         }
 
         /**

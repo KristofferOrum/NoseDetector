@@ -47,8 +47,6 @@ import static com.example.nayanmehta.nosedetection.MainActivity.noseFlip;
 public class FaceGraphic extends GraphicOverlay.Graphic {
 
     private static final String TAG = "Nayan Mehta Face Graphic";
-    //public Handler handler;
-
     private static final float FACE_POSITION_RADIUS = 10.0f;
     private static final float ID_TEXT_SIZE = 40.0f;
     private static final float ID_Y_OFFSET = 50.0f;
@@ -115,16 +113,6 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     private Paint mBoxPaint;
 
 
-    /*public Runnable runnableCode = new Runnable() {
-        @Override
-        public void run() {
-            // Do something here on the main thread
-            Log.d("Handlers", "Called on main thread");
-            // Repeat this the same runnable code block again another 2 seconds
-            //handler.postDelayed(runnableCode, 2000);
-        }
-    };*/
-
     public FaceGraphic(GraphicOverlay overlay, Context context) {
         super(overlay);
 
@@ -148,8 +136,6 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         mBoxPaint.setColor(selectedColor);
         mBoxPaint.setStyle(Paint.Style.STROKE);
         mBoxPaint.setStrokeWidth(BOX_STROKE_WIDTH);
-        //handler = new Handler(Looper.getMainLooper());
-
 
     }
 
@@ -346,10 +332,6 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
                         takePictureButton.performClick();
                     }
 
-
-//                Log.d(TAG,"EulerZ:"+mFace.getEulerZ());
-//                Log.d(TAG,"EulerY:"+mFace.getEulerY());
-
             }
             catch (Exception e){
                 System.out.println("Error ");
@@ -358,7 +340,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
 
         }
-       // handler.post(runnableCode);
+       
 
     }
 
